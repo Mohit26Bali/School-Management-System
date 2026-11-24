@@ -3,6 +3,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const { PrismaClient } = require("@prisma/client");
 const { getClasses, getSubjects, findClassById } = require("../utils/academicOptions");
+const { teacherProblems } = require("../utils/people");
 
 const prisma = new PrismaClient();
 
@@ -74,12 +75,13 @@ async function create(req, res) {
   const data = fieldsFromBody(req.body);
   if (req.file) data.imageUrl = `/uploads/${req.file.filename}`;
 
-  if (!data.teacherId || !data.name) {
+  const problems = teacherProblems(req.body);
+  if (problems.length) {
     return res.status(400).render("teachers/add", {
       title: "Add Teachers",
       currentPage: "teachers",
       ...(await formOptions()),
-      error: "Teacher ID and Name are required.",
+      error: problems.join(" "),
       values: req.body,
     });
   }
@@ -166,6 +168,17 @@ async function update(req, res) {
 
   const teacher = await prisma.teacher.findUnique({ where: { id } });
   if (!teacher) return res.status(404).render("errors/404", { title: "Not Found" });
+
+  const problems = teacherProblems(req.body);
+  if (problems.length) {
+    return res.status(400).render("teachers/edit", {
+      title: "Edit Teacher",
+      currentPage: "teachers",
+      teacher: { ...teacher, ...req.body },
+      ...(await formOptions()),
+      error: problems.join(" "),
+    });
+  }
 
   if (data.teacherId !== teacher.teacherId) {
     const existing = await prisma.teacher.findUnique({ where: { teacherId: data.teacherId } });

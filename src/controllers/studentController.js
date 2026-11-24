@@ -3,8 +3,18 @@ const path = require("path");
 const { PrismaClient } = require("@prisma/client");
 const { getClasses, findClassById } = require("../utils/academicOptions");
 const { statementFor } = require("../utils/feeBalance");
+const { studentProblems } = require("../utils/people");
 
 const prisma = new PrismaClient();
+
+// Is this class already at its capacity (counting active students only)?
+async function classFullMessage(classId, currentClassId) {
+  if (!classId || classId === currentClassId) return null;
+  const cls = await prisma.class.findUnique({ where: { id: classId } });
+  if (!cls) return null;
+  const enrolled = await prisma.student.count({ where: { classId, active: true } });
+  return enrolled >= cls.capacity ? `Class ${cls.name} ${cls.section} is full (${enrolled} of ${cls.capacity} places). Choose another class or raise its capacity under Classes.` : null;
+}
 
 function fieldsFromBody(body) {
   return {
@@ -57,12 +67,13 @@ async function create(req, res) {
   const data = fieldsFromBody(req.body);
   if (req.file) data.imageUrl = `/uploads/${req.file.filename}`;
 
-  if (!data.firstName || !data.lastName || !data.studentId) {
+  const problems = studentProblems(req.body);
+  if (problems.length) {
     return res.status(400).render("students/add", {
       title: "Add Students",
       currentPage: "students",
       classes: await getClasses(),
-      error: "First name, last name, and Student ID are required.",
+      error: problems.join(" "),
       values: req.body,
     });
   }
@@ -88,6 +99,11 @@ async function create(req, res) {
     });
   }
 
+  const full = await classFullMessage(data.classId, null);
+  if (full) {
+    return res.status(400).render("students/add", { title: "Add Students", currentPage: "students", classes: await getClasses(), error: full, values: req.body });
+  }
+
   await prisma.student.create({ data });
   res.redirect("/students");
 }
@@ -105,6 +121,17 @@ async function update(req, res) {
 
   const student = await prisma.student.findUnique({ where: { id } });
   if (!student) return res.status(404).render("errors/404", { title: "Not Found" });
+
+  const problems = studentProblems(req.body);
+  if (problems.length) {
+    return res.status(400).render("students/edit", {
+      title: "Edit Student",
+      currentPage: "students",
+      student: { ...student, ...req.body },
+      classes: await getClasses(),
+      error: problems.join(" "),
+    });
+  }
 
   if (data.studentId !== student.studentId) {
     const existing = await prisma.student.findUnique({ where: { studentId: data.studentId } });
@@ -126,6 +153,17 @@ async function update(req, res) {
       student: { ...student, ...req.body },
       classes: await getClasses(),
       error: "Selected class is invalid.",
+    });
+  }
+
+  const full = await classFullMessage(data.classId, student.classId);
+  if (full) {
+    return res.status(400).render("students/edit", {
+      title: "Edit Student",
+      currentPage: "students",
+      student: { ...student, ...req.body },
+      classes: await getClasses(),
+      error: full,
     });
   }
 

@@ -33,6 +33,7 @@ const timeTableRoutes = require("./routes/timeTable");
 const searchRoutes = require("./routes/search");
 const examResultsRoutes = require("./routes/examResults");
 const auditRoutes = require("./routes/audit");
+const classRoutes = require("./routes/classes");
 const { auditContext } = require("./utils/audit");
 const { requireAuth, requireRole } = require("./middleware/auth");
 
@@ -99,6 +100,7 @@ app.use("/profile", requireAuth, profileRoutes);
 app.use("/exam-results", requireAuth, requireRole("admin", "teacher"), examResultsRoutes);
 app.use("/attendance", requireAuth, requireRole("admin"), attendanceRoutes);
 app.use("/audit", requireAuth, requireRole("admin"), auditRoutes);
+app.use("/classes", requireAuth, requireRole("admin"), classRoutes);
 app.use("/", requireAuth, requireRole("admin"), dashboardRoutes);
 app.use("/students", requireAuth, requireRole("admin"), studentRoutes);
 app.use("/teachers", requireAuth, requireRole("admin"), teacherRoutes);

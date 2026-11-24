@@ -28,6 +28,9 @@
                   <li><a href="/teachers/add">Add Teacher</a></li>
                </ul>
             </li>
+            <li class="<%= currentPage === 'classes' ? 'active' : '' %>">
+               <a href="/classes"><i class="fas fa-school"></i> <span>Classes</span></a>
+            </li>
             <li class="submenu <%= currentPage === 'departments' ? 'active' : '' %>">
                <a href="#"><i class="fas fa-building"></i> <span> Departments</span> <span class="menu-arrow"></span></a>
                <ul>

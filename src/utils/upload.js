@@ -77,6 +77,13 @@ function imageUpload(field) {
         next(err);
       }),
     checkImage,
+    // If the request is refused later (bad form data, duplicate ID...), do not leave the uploaded photo behind.
+    (req, res, next) => {
+      res.on("finish", () => {
+        if (res.statusCode >= 400) discard(req.file);
+      });
+      next();
+    },
   ];
 }
 

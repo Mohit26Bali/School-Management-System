@@ -1,0 +1,57 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Classes</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+<li class="breadcrumb-item active">Classes</li>
+</ul>
+</div>
+</div>
+</div>
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+<% if (saved) { %><div class="alert alert-success">Capacity saved.</div><% } %>
+<div class="card card-table">
+<div class="card-body">
+<p class="text-muted">A class cannot take more active students than its capacity. The default is 40.</p>
+<div class="table-responsive">
+<table class="table table-hover table-center mb-0">
+<thead>
+<tr><th>Class</th><th>Section</th><th>Students</th><th>Capacity</th><th>Places left</th><th></th></tr>
+</thead>
+<tbody>
+<% classes.forEach(function(c) { %>
+<tr>
+<td><%= c.name %></td>
+<td><%= c.section %></td>
+<td><%= c.enrolled %></td>
+<td>
+<form method="POST" action="/classes/<%= c.id %>/capacity" class="form-inline justify-content-center">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<input type="number" name="capacity" min="1" max="200" value="<%= c.capacity %>" class="form-control form-control-sm mr-2" style="width:90px" aria-label="Capacity of class <%= c.name %> <%= c.section %>">
+<button type="submit" class="btn btn-sm btn-outline-primary">Save</button>
+</form>
+</td>
+<td><%= Math.max(0, c.capacity - c.enrolled) %></td>
+<td></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>
