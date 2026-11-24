@@ -1,0 +1,128 @@
+# School Management System
+
+A full-stack school/college administration web app built with **Node.js, Express, Prisma (SQLite), and server-rendered EJS views**. It supports three roles — **Admin**, **Teacher**, and **Student** — each with their own dashboard and permissions, and covers the day-to-day operations of running a school: student/teacher records, attendance, exams, fees, timetables, library, hostel, transport, and more.
+
+## Tech Stack
+
+| Layer           | Choice                                                                                                      |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| Runtime         | Node.js, Express 4                                                                                          |
+| Views           | EJS templates, server-rendered (no SPA framework)                                                           |
+| Database        | SQLite via Prisma ORM                                                                                       |
+| Auth            | `express-session` (file-backed store) + `bcryptjs` password hashing                                         |
+| Security        | `helmet` security headers, hand-rolled CSRF protection, `express-rate-limit` on login                       |
+| File uploads    | `multer` (student/teacher profile photos)                                                                   |
+| Frontend assets | Bootstrap-based admin template (vendored CSS/JS), DataTables, Select2, bootstrap-datetimepicker, ApexCharts |
+
+No build step, no bundler — static assets are served as-is from `public/`, and pages are rendered server-side per request.
+
+## Getting Started
+
+```bash
+npm install
+npx prisma migrate dev      # create/update the SQLite database
+npx prisma db seed          # (or: node prisma/seed.js) populate sample data
+npm run dev                 # starts the server at http://localhost:3000
+```
+
+Environment config lives in `.env` (copy `.env.example` to start):
+
+```
+DATABASE_URL="file:./dev.db"
+SESSION_SECRET="<32+ random characters>"
+```
+
+Generate a secret with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. In development a missing or weak `SESSION_SECRET` falls back to a temporary random one (you are signed out on every restart); with `NODE_ENV=production` the app **refuses to start** without a real one. Other optional settings (`PORT`, `NODE_ENV`, `TRUST_PROXY`, `LOGIN_ATTEMPT_LIMIT`) are described in `.env.example`.
+
+### Tests
+
+```bash
+npm test
+```
+
+Starts the real app on a throwaway database and checks login, sessions, CSRF, role access, password reset, attendance rules, uploads and the login rate limit.
+
+### Seeded logins (after running the seed script)
+
+| Role              | Email                            | Password     |
+| ----------------- | -------------------------------- | ------------ |
+| Admin             | `admin@school.local`             | `admin123`   |
+| Teacher (several) | e.g. `daisy.parks@school.local`  | `teacher123` |
+| Student (a few)   | e.g. `aaliyah.wong@school.local` | `student123` |
+
+The seed script prints the full list of generated logins to the console when it runs.
+
+There is intentionally **no self-registration** — accounts are provisioned by an admin from the Students/Teachers pages (optionally granting portal login by supplying an email + password there). This avoids unauthenticated users being able to register themselves as admin.
+
+## Roles & Permissions
+
+Role is stored on the `User` record and checked by `requireRole` middleware (`src/middleware/auth.js`) on every route group.
+
+- **Admin** — full access: manage students, teachers, departments, subjects, fees, fee collection, expenses, salaries, exams, library, hostel, transport, sports, holidays, events, timetable, and the attendance report. Sees a dashboard with school-wide KPIs and charts, plus a header search box (students/teachers) and real notifications.
+- **Teacher** — sees their own dashboard (classes this week, students taught, subjects taught, teaching hours, upcoming lessons, semester progress), marks daily attendance for their homeroom class, and edits their own profile.
+- **Student** — sees their own dashboard (subjects, fees paid, exam results/pass rate, attendance %, upcoming lessons), views their own attendance history and exam results, and edits their own profile.
+
+## Data Model
+
+The schema (`prisma/schema.prisma`) is fully relational — there are no free-text "class"/"section"/"subject" string fields doing the job of a foreign key. Key entities:
+
+- **User** — login identity (email/password hash/role), optionally linked 1:1 to a `Student` or `Teacher` record.
+- **Class** — the class+section unit (e.g. "10 - A"), referenced by FK from Student, Teacher (homeroom), Exam, TimeTableEntry, Attendance, Fee, and Book — this is what replaced the old string-matching approach.
+- **Student** / **Teacher** — core people records; a Teacher has one homeroom `Class` and any number of subjects taught via `TeacherSubject`.
+- **TeacherSubject** — join table expressing "this teacher teaches this subject for this class" (many-to-many).
+- **Subject** — a pure catalog of subject names (no class scoping — which classes a subject applies to is expressed via `TeacherSubject`/`Exam`).
+- **Attendance** — one row per student per day (`@@unique([studentId, date])`), tied to the class and the teacher who marked it.
+- **Exam** / **ExamResult** — exams per class/subject, with per-student results (marks, pass/fail).
+- **TimeTableEntry** — a scheduled lesson (teacher, class, subject, date/time).
+- **FeesCollection** / **Fee** — money actually collected from students vs. the fee schedule/types configured by class.
+- Supporting entities: **Department, Book (library), HostelRoom, Transport, Sport, Holiday, Event, Salary, Expense.**
+
+## Application Structure
+
+```
+src/
+  app.js                 # Express app setup: middleware, route mounting, error handling
+  server.js              # HTTP server bootstrap
+  routes/                # One router per resource, thin — just maps HTTP verbs to controller fns
+  controllers/           # All business logic + Prisma queries live here
+  middleware/
+    auth.js              # requireAuth / requireRole
+    csrf.js              # session-bound CSRF token issue + verification
+    notifications.js     # per-role "recent activity" for the header bell
+  utils/
+    asyncHandler.js       # wraps every controller so async errors reach Express's error handler
+    academicOptions.js    # shared Class/Subject dropdown data for forms
+    calendar.js            # calendar widget data (holidays/events)
+  views/                 # EJS templates, one folder per resource + partials/
+prisma/
+  schema.prisma          # data model
+  seed.js                # sample data generator (idempotent — safe to re-run)
+  migrations/            # versioned migration history
+public/                  # static assets: css, js, images, vendor libraries, uploaded photos
+```
+
+**Routing note:** Express treats a router mounted at `/` as a prefix match for _every_ path, so role-scoped routes (`/teacher/dashboard`, `/student/dashboard`, `/search`, etc.) are registered in `app.js` **before** the admin catch-all `/` mount — otherwise the admin-only middleware would shadow them.
+
+## Notable Features
+
+- **Async error handling** — every controller export is wrapped by `wrapController()` so a rejected promise in a route handler is passed to Express's error handler instead of crashing the process; a generic branded 500 page is rendered.
+- **Persistent sessions** — sessions are stored on disk (`session-file-store`, in `.sessions/`) rather than in memory, so logins survive a server restart.
+- **Password reset** — a real token-based flow (`crypto`-generated token, sha256 hash stored, 1-hour expiry, single-use, no account-enumeration on unknown emails). There is no email provider configured, so in development (`NODE_ENV` not `production`) the link is shown on the confirmation page. **In production it is never shown** (that would let anyone reset any account); it is written to the server log for the administrator to pass on, until real email delivery is added. A successful reset also signs that user out everywhere.
+- **Safe uploads** — profile photos are checked by their actual bytes (JPEG, PNG or WebP only, 2 MB max), saved under a random file name with an extension chosen by the server, so an uploaded script can never be served as a page.
+- **Sessions** — the session id changes at login, cookies are `HttpOnly` and `SameSite=Lax` (and `Secure` in production), and the app will not start in production without a real `SESSION_SECRET`. Login takes the same time for an unknown email as for a wrong password.
+- **CSRF protection** — every POST form carries a session-bound `_csrf` token, checked by custom middleware (not the deprecated `csurf` package). File-upload (multipart) routes verify the token _after_ `multer` parses the body, since the request is still multipart at that point.
+- **Security headers** — `helmet` is enabled with CSP explicitly disabled (the UI relies on inline `<script>`/`<style>` blocks throughout for charts, the theme toggle, etc.); the other headers (HSTS, X-Frame-Options, nosniff) are on.
+- **Login rate limiting** — 10 attempts / 15 minutes per IP via `express-rate-limit`, applied to both correct and incorrect attempts (not just failures) to actually stop brute-forcing.
+- **Attendance tracking** — teachers mark daily Present/Absent/Late per student in their homeroom; admins get a filterable report; students see their own history and an attendance-percentage KPI on their dashboard.
+- **Dark mode** — a manual, persisted toggle (cookie-based) in the header; the theme class is applied to `<html>` via a blocking inline script in `<head>` to avoid a flash of the wrong theme on load.
+- **DataTables / Select2 / datepicker / input masking** — wired up on list pages and forms (search, sort, pagination on tables; searchable dropdowns for class/subject/etc.; a real date picker instead of raw `<input type="date">`; masked phone number inputs).
+- **Header search** (admin-only) — looks up students and teachers by name/ID.
+- **Real notifications** — the header bell shows actual recent activity per role (recent fee payments for admin, upcoming lessons for teachers, graded exam results for students) instead of a static placeholder.
+
+## Known Limitations / Not Implemented
+
+- No messaging/inbox feature.
+- No real email delivery (password reset links are shown on-page instead — see above).
+- SQLite is used for development; there's no configured production datastore (e.g. Postgres) or deployment pipeline.
+- The automated tests cover security and access rules (`npm test`); the page-by-page CRUD screens are verified by hand.
+- Logging out is also possible with a plain link (`GET /logout`), so another site can sign a user out. Harmless, but a POST-only logout button would be tidier.

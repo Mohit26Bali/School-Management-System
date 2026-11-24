@@ -1,0 +1,68 @@
+<%- include('../partials/head', { title }) %>
+<body class="auth-bg">
+<div class="main-wrapper login-body">
+<div class="login-wrapper">
+<div class="container">
+<div class="loginbox">
+<div class="login-left">
+<img class="img-fluid" src="/img/logo-white.png" alt="Logo">
+<h4 class="login-left-heading">School Management Simplified</h4>
+<p class="login-left-caption">Manage students, teachers, attendance, grades, and communication from one intuitive dashboard.</p>
+<ul class="login-left-features">
+<li><i class="fas fa-check-circle"></i> Student Management</li>
+<li><i class="fas fa-check-circle"></i> Attendance Tracking</li>
+<li><i class="fas fa-check-circle"></i> Grade Management</li>
+</ul>
+</div>
+<div class="login-right">
+<div class="login-right-wrap">
+<h1>Login</h1>
+<p class="account-subtitle">Access to our dashboard</p>
+
+<div class="role-tabs" role="tablist" aria-label="Login as">
+<button type="button" class="role-tab <%= role === 'admin' ? 'active' : '' %>" data-role="admin">Admin</button>
+<button type="button" class="role-tab <%= role === 'teacher' ? 'active' : '' %>" data-role="teacher">Teacher</button>
+<button type="button" class="role-tab <%= role === 'student' ? 'active' : '' %>" data-role="student">Student</button>
+</div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="alert alert-danger"><%= error %></div>
+<% } %>
+<% if (typeof message !== 'undefined' && message) { %>
+<div class="alert alert-success"><%= message %></div>
+<% } %>
+
+<form method="POST" action="/login">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<input type="hidden" name="role" id="roleInput" value="<%= role %>">
+<div class="form-group">
+<i class="fas fa-envelope input-icon"></i>
+<input class="form-control" type="email" name="email" placeholder="Email" value="<%= typeof email !== 'undefined' ? email : '' %>" required>
+</div>
+<div class="form-group">
+<i class="fas fa-lock input-icon"></i>
+<input class="form-control" type="password" name="password" placeholder="Password" required>
+</div>
+<div class="form-group">
+<button class="btn btn-primary btn-block" type="submit">Login</button>
+</div>
+</form>
+<div class="text-center forgotpass"><a href="/forgot-password">Forgot Password?</a></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+<script>
+document.querySelectorAll('.role-tab').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.role-tab').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('roleInput').value = btn.dataset.role;
+  });
+});
+</script>
+</body>
+</html>

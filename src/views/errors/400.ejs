@@ -1,0 +1,13 @@
+<%- include('../partials/head', { title }) %>
+<body class="error-page">
+<div class="main-wrapper">
+<div class="error-box">
+<h1>400</h1>
+<h3 class="h2 mb-3"><i class="fas fa-exclamation-triangle"></i> Request not accepted</h3>
+<p class="h4 font-weight-normal"><%= typeof message !== 'undefined' && message ? message : "Something about that request was not valid." %></p>
+<a href="javascript:history.back()" class="btn btn-primary">Go back</a>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Search results for "<%= q %>"</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+<li class="breadcrumb-item active">Search</li>
+</ul>
+</div>
+</div>
+</div>
+
+<% if (!q) { %>
+<div class="card"><div class="card-body text-muted">Type something in the search box above.</div></div>
+<% } else if (students.length === 0 && teachers.length === 0) { %>
+<div class="card"><div class="card-body text-muted">No matches for "<%= q %>".</div></div>
+<% } else { %>
+
+<% if (students.length > 0) { %>
+<div class="card card-table">
+<div class="card-body">
+<h5 class="mb-3">Students</h5>
+<div class="table-responsive">
+<table class="table table-hover table-center mb-0">
+<thead><tr><th>Student ID</th><th>Name</th><th>Class</th><th></th></tr></thead>
+<tbody>
+<% students.forEach(function(s) { %>
+<tr>
+<td><%= s.studentId %></td>
+<td><%= s.firstName %> <%= s.lastName %></td>
+<td><%= s.classRef ? s.classRef.name + ' ' + s.classRef.section : '-' %></td>
+<td class="text-right"><a href="/students/<%= s.id %>" class="btn btn-sm btn-outline-primary">View</a></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<% } %>
+
+<% if (teachers.length > 0) { %>
+<div class="card card-table">
+<div class="card-body">
+<h5 class="mb-3">Teachers</h5>
+<div class="table-responsive">
+<table class="table table-hover table-center mb-0">
+<thead><tr><th>Teacher ID</th><th>Name</th><th>Subject</th><th></th></tr></thead>
+<tbody>
+<% teachers.forEach(function(t) { %>
+<tr>
+<td><%= t.teacherId %></td>
+<td><%= t.name %></td>
+<td><%= t.teacherSubjects.length ? t.teacherSubjects.map(function(ts){ return ts.subject.name; }).join(', ') : '-' %></td>
+<td class="text-right"><a href="/teachers/<%= t.id %>" class="btn btn-sm btn-outline-primary">View</a></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<% } %>
+
+<% } %>
+
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>

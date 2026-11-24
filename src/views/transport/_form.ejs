@@ -1,0 +1,62 @@
+<%
+const r = typeof route !== 'undefined' ? route : {};
+function val(v) { return v === null || v === undefined ? '' : v; }
+%>
+<div class="row">
+<div class="col-sm-12">
+<div class="card">
+<div class="card-body">
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="alert alert-danger"><%= error %></div>
+<% } %>
+<form method="POST" action="<%= formAction %>">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="row">
+<div class="col-12">
+<h5 class="form-title"><span>Transport Information</span></h5>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Route Name</label>
+<input type="text" name="routeName" class="form-control" value="<%= val(r.routeName) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Vehicle Number</label>
+<input type="text" name="vehicleNumber" class="form-control" value="<%= val(r.vehicleNumber) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Driver Name</label>
+<input type="text" name="driverName" class="form-control" value="<%= val(r.driverName) %>">
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>License Number</label>
+<input type="text" name="licenseNumber" class="form-control" value="<%= val(r.licenseNumber) %>">
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Contact Number</label>
+<input type="text" name="contactNumber" class="form-control phone-input" value="<%= val(r.contactNumber) %>">
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Driver Address</label>
+<input type="text" name="driverAddress" class="form-control" value="<%= val(r.driverAddress) %>">
+</div>
+</div>
+<div class="col-12">
+<button type="submit" class="btn btn-primary">Submit</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>

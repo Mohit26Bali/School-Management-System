@@ -1,0 +1,61 @@
+<%
+const h = typeof holiday !== 'undefined' ? holiday : {};
+function val(v) { return v === null || v === undefined ? '' : v; }
+%>
+<div class="row">
+<div class="col-sm-12">
+<div class="card">
+<div class="card-body">
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="alert alert-danger"><%= error %></div>
+<% } %>
+<form method="POST" action="<%= formAction %>">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="row">
+<div class="col-12">
+<h5 class="form-title"><span>Holiday Information</span></h5>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Holiday Id</label>
+<input type="text" name="holidayId" class="form-control" value="<%= val(h.holidayId) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Holiday Name</label>
+<input type="text" name="name" class="form-control" value="<%= val(h.name) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Type of Holiday</label>
+<select name="type" class="form-control select">
+<option value="" <%= !h.type ? 'selected' : '' %>>Select Holiday</option>
+<% types.forEach(function(t) { %>
+<option <%= h.type === t ? 'selected' : '' %>><%= t %></option>
+<% }) %>
+</select>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Start Date</label>
+<input type="text" name="startDate" class="form-control datetimepicker" value="<%= h.startDate ? new Date(h.startDate).toISOString().slice(0,10) : '' %>">
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>End Date</label>
+<input type="text" name="endDate" class="form-control datetimepicker" value="<%= h.endDate ? new Date(h.endDate).toISOString().slice(0,10) : '' %>">
+</div>
+</div>
+<div class="col-12">
+<button type="submit" class="btn btn-primary">Submit</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>

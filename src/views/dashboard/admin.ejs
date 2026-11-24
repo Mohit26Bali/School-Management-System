@@ -1,0 +1,96 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Welcome, <%= sessionUser.name %>!</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item">Dashboard</li>
+<li class="breadcrumb-item active">Admin Dashboard</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-xl-3 col-sm-6 col-12">
+<div class="card bg-one">
+<div class="card-body d-flex align-items-center">
+<div class="db-icon"><i class="fas fa-user-graduate"></i></div>
+<div class="db-info"><h3><%= studentCount %></h3><h6>Students</h6></div>
+</div>
+</div>
+</div>
+<div class="col-xl-3 col-sm-6 col-12">
+<div class="card bg-two">
+<div class="card-body d-flex align-items-center">
+<div class="db-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+<div class="db-info"><h3><%= teacherCount %></h3><h6>Teachers</h6></div>
+</div>
+</div>
+</div>
+<div class="col-xl-3 col-sm-6 col-12">
+<div class="card bg-three">
+<div class="card-body d-flex align-items-center">
+<div class="db-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+<div class="db-info"><h3><%= feesTotal.toFixed(0) %></h3><h6>Fees Collected</h6></div>
+</div>
+</div>
+</div>
+<div class="col-xl-3 col-sm-6 col-12">
+<div class="card bg-four">
+<div class="card-body d-flex align-items-center">
+<div class="db-icon"><i class="fas fa-money-bill-wave"></i></div>
+<div class="db-info"><h3><%= expensesTotal.toFixed(0) %></h3><h6>Expenses</h6></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-lg-8">
+<div class="card card-chart">
+<div class="card-body">
+<h5 class="mb-3">Fees Collected vs Expenses (last 6 months)</h5>
+<div id="feesExpensesChart"></div>
+</div>
+</div>
+</div>
+<div class="col-lg-4">
+<div class="card">
+<div class="card-body">
+<%- include('../partials/calendar', { calendar }) %>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts', { extraScripts: ['/vendor/apexchart/apexcharts.min.js'] }) %>
+<script>
+(function () {
+  var isDark = document.documentElement.classList.contains('dark-mode');
+  new ApexCharts(document.querySelector("#feesExpensesChart"), {
+    chart: { height: 320, type: "area", toolbar: { show: false }, foreColor: isDark ? '#b7bdc9' : undefined },
+    theme: { mode: isDark ? 'dark' : 'light' },
+    grid: { borderColor: isDark ? '#262b38' : undefined },
+    dataLabels: { enabled: false },
+    stroke: { curve: "smooth" },
+    series: [
+      { name: "Fees Collected", data: <%- JSON.stringify(feesSeries) %> },
+      { name: "Expenses", color: "#FFBC53", data: <%- JSON.stringify(expensesSeries) %> }
+    ],
+    xaxis: { categories: <%- JSON.stringify(chartLabels) %> }
+  }).render();
+})();
+</script>
+</body>
+</html>

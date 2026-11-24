@@ -1,0 +1,36 @@
+{
+  "name": "school-management",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "build": "prisma generate && prisma migrate deploy",
+    "prisma:seed": "node prisma/seed.js",
+    "test": "node --test tests/security.test.js tests/rate-limit.test.js"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.5.2",
+    "express-session": "^1.18.0",
+    "express-validator": "^7.2.0",
+    "helmet": "^8.2.0",
+    "multer": "^2.0.0",
+    "session-file-store": "^1.5.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.20.0"
+  }
+}

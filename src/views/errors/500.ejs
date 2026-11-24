@@ -1,0 +1,21 @@
+<%- include('../partials/head', { title }) %>
+<body class="error-page">
+<div class="main-wrapper">
+<div class="error-box">
+<h1>500</h1>
+<h3 class="h2 mb-3"><i class="fas fa-exclamation-triangle"></i> Something went wrong</h3>
+<p class="h4 font-weight-normal">An unexpected error occurred. It's been logged — please try again.</p>
+<%
+  let homeHref = "/login";
+  if (typeof sessionUser !== 'undefined' && sessionUser) {
+    if (sessionUser.role === 'admin') homeHref = '/';
+    else if (sessionUser.role === 'teacher') homeHref = '/teacher/dashboard';
+    else if (sessionUser.role === 'student') homeHref = '/student/dashboard';
+  }
+%>
+<a href="<%= homeHref %>" class="btn btn-primary">Back to Dashboard</a>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>

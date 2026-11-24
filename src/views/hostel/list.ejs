@@ -1,0 +1,79 @@
+<%- include('../partials/head', { title, extraCss: ['/vendor/datatables/datatables.min.css'] }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Hostel</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+<li class="breadcrumb-item active">Hostel</li>
+</ul>
+</div>
+<div class="col-auto text-right float-right ml-auto">
+<a href="/hostel/add" class="btn btn-primary"><i class="fas fa-plus"></i> Add Room</a>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-12">
+<div class="card card-table">
+<div class="card-body">
+<div class="table-responsive">
+<table class="table table-hover table-center mb-0 datatable">
+<thead>
+<tr>
+<th>Block</th>
+<th>Room No</th>
+<th>Room Type</th>
+<th>No of Beds</th>
+<th>Cost per Bed</th>
+<th>Availability</th>
+<th class="text-right">Action</th>
+</tr>
+</thead>
+<tbody>
+<% if (rooms.length === 0) { %>
+<tr><td colspan="7" class="text-center text-muted">No rooms yet. <a href="/hostel/add">Add the first one</a>.</td></tr>
+<% } %>
+<% rooms.forEach(function(room) { %>
+<tr>
+<td><%= room.block %></td>
+<td><%= room.roomNo %></td>
+<td><%= room.roomType || '-' %></td>
+<td><%= room.noOfBeds !== null ? room.noOfBeds : '-' %></td>
+<td><%= room.costPerBed !== null ? room.costPerBed.toFixed(2) : '-' %></td>
+<td><span class="badge <%= room.availability === 'Available' ? 'badge-success' : 'badge-danger' %>"><%= room.availability %></span></td>
+<td class="text-right">
+<div class="actions">
+<a href="/hostel/<%= room.id %>/edit" class="btn btn-sm bg-success-light mr-2">
+<i class="fas fa-pen"></i>
+</a>
+<form method="POST" action="/hostel/<%= room.id %>/delete" class="d-inline" onsubmit="return confirm('Delete this room?');">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<button type="submit" class="btn btn-sm bg-danger-light">
+<i class="fas fa-trash"></i>
+</button>
+</form>
+</div>
+</td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts', { extraScripts: ['/vendor/datatables/datatables.min.js'] }) %>
+</body>
+</html>

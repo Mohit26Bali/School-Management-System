@@ -1,0 +1,153 @@
+<%
+  const dashboardHref = sessionUser && sessionUser.role === 'teacher' ? '/teacher/dashboard'
+    : sessionUser && sessionUser.role === 'student' ? '/student/dashboard'
+    : '/';
+%>
+<div class="sidebar" id="sidebar">
+   <div class="sidebar-inner slimscroll">
+      <div id="sidebar-menu" class="sidebar-menu">
+         <ul>
+            <li class="menu-title">
+               <span>Main Menu</span>
+            </li>
+            <li class="<%= currentPage === 'dashboard' ? 'active' : '' %>">
+               <a href="<%= dashboardHref %>"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            </li>
+<% if (sessionUser && sessionUser.role === 'admin') { %>
+            <li class="submenu <%= currentPage === 'students' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-user-graduate"></i> <span> Students</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/students" class="<%= currentPage === 'students' ? 'active' : '' %>">Student List</a></li>
+                  <li><a href="/students/add">Add Student</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'teachers' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Teachers</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/teachers" class="<%= currentPage === 'teachers' ? 'active' : '' %>">Teacher List</a></li>
+                  <li><a href="/teachers/add">Add Teacher</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'departments' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-building"></i> <span> Departments</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/departments" class="<%= currentPage === 'departments' ? 'active' : '' %>">Department List</a></li>
+                  <li><a href="/departments/add">Add Department</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'subjects' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-book-reader"></i> <span> Subjects</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/subjects" class="<%= currentPage === 'subjects' ? 'active' : '' %>">Subject List</a></li>
+                  <li><a href="/subjects/add">Add Subject</a></li>
+               </ul>
+            </li>
+            <li class="menu-title">
+               <span>Accounts</span>
+            </li>
+            <li class="submenu <%= currentPage === 'fees' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-comment-dollar"></i> <span> Fees</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/fees" class="<%= currentPage === 'fees' ? 'active' : '' %>">Fees List</a></li>
+                  <li><a href="/fees/add">Add Fees</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'fees-collections' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-file-invoice-dollar"></i> <span> Fees Collection</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/fees-collections" class="<%= currentPage === 'fees-collections' ? 'active' : '' %>">Fees Collection List</a></li>
+                  <li><a href="/fees-collections/add">Add Fees Collection</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'expenses' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-money-bill-wave"></i> <span> Expenses</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/expenses" class="<%= currentPage === 'expenses' ? 'active' : '' %>">Expenses List</a></li>
+                  <li><a href="/expenses/add">Add Expenses</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'salary' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-wallet"></i> <span> Salary</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/salary" class="<%= currentPage === 'salary' ? 'active' : '' %>">Salary List</a></li>
+                  <li><a href="/salary/add">Add Salary</a></li>
+               </ul>
+            </li>
+            <li class="menu-title">
+               <span>Academics</span>
+            </li>
+            <li class="submenu <%= currentPage === 'exam' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-clipboard-list"></i> <span> Exam</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/exam" class="<%= currentPage === 'exam' ? 'active' : '' %>">Exam List</a></li>
+                  <li><a href="/exam/add">Add Exam</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'library' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-book"></i> <span> Library</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/library" class="<%= currentPage === 'library' ? 'active' : '' %>">Book List</a></li>
+                  <li><a href="/library/add">Add Book</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'holiday' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-holly-berry"></i> <span> Holiday</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/holiday" class="<%= currentPage === 'holiday' ? 'active' : '' %>">Holiday List</a></li>
+                  <li><a href="/holiday/add">Add Holiday</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'event' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-calendar-day"></i> <span> Events</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/event" class="<%= currentPage === 'event' ? 'active' : '' %>">Event List</a></li>
+                  <li><a href="/event/add">Add Event</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'time-table' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-table"></i> <span> Time Table</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/time-table" class="<%= currentPage === 'time-table' ? 'active' : '' %>">Time Table List</a></li>
+                  <li><a href="/time-table/add">Add Entry</a></li>
+               </ul>
+            </li>
+            <li class="<%= currentPage === 'attendance' ? 'active' : '' %>">
+               <a href="/attendance"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
+            </li>
+            <li class="menu-title">
+               <span>Others</span>
+            </li>
+            <li class="submenu <%= currentPage === 'hostel' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-hotel"></i> <span> Hostel</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/hostel" class="<%= currentPage === 'hostel' ? 'active' : '' %>">Room List</a></li>
+                  <li><a href="/hostel/add">Add Room</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'transport' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-bus"></i> <span> Transport</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/transport" class="<%= currentPage === 'transport' ? 'active' : '' %>">Route List</a></li>
+                  <li><a href="/transport/add">Add Route</a></li>
+               </ul>
+            </li>
+            <li class="submenu <%= currentPage === 'sports' ? 'active' : '' %>">
+               <a href="#"><i class="fas fa-baseball-ball"></i> <span> Sports</span> <span class="menu-arrow"></span></a>
+               <ul>
+                  <li><a href="/sports" class="<%= currentPage === 'sports' ? 'active' : '' %>">Sports List</a></li>
+                  <li><a href="/sports/add">Add Sport</a></li>
+               </ul>
+            </li>
+<% } else if (sessionUser && sessionUser.role === 'teacher') { %>
+            <li class="<%= currentPage === 'attendance' ? 'active' : '' %>">
+               <a href="/teacher/attendance"><i class="fas fa-calendar-check"></i> <span>Mark Attendance</span></a>
+            </li>
+<% } else if (sessionUser && sessionUser.role === 'student') { %>
+            <li class="<%= currentPage === 'attendance' ? 'active' : '' %>">
+               <a href="/student/attendance"><i class="fas fa-calendar-check"></i> <span>My Attendance</span></a>
+            </li>
+<% } %>
+         </ul>
+      </div>
+   </div>
+</div>

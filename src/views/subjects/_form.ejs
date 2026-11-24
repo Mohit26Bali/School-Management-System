@@ -1,0 +1,38 @@
+<%
+const s = typeof subject !== 'undefined' ? subject : {};
+function val(v) { return v === null || v === undefined ? '' : v; }
+%>
+<div class="row">
+<div class="col-sm-12">
+<div class="card">
+<div class="card-body">
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="alert alert-danger"><%= error %></div>
+<% } %>
+<form method="POST" action="<%= formAction %>">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="row">
+<div class="col-12">
+<h5 class="form-title"><span>Subject Information</span></h5>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Subject ID</label>
+<input type="text" name="subjectId" class="form-control" value="<%= val(s.subjectId) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Subject Name</label>
+<input type="text" name="name" class="form-control" value="<%= val(s.name) %>" required>
+</div>
+</div>
+<div class="col-12">
+<button type="submit" class="btn btn-primary">Submit</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>

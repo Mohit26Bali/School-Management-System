@@ -1,0 +1,26 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Edit Subject</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/subjects">Subjects</a></li>
+<li class="breadcrumb-item active">Edit Subject</li>
+</ul>
+</div>
+</div>
+</div>
+<%- include('./_form', { formAction: '/subjects/' + subject.id, subject: subject, error: typeof error !== 'undefined' ? error : null }) %>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>

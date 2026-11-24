@@ -1,0 +1,76 @@
+<%- include('../partials/head', { title, extraCss: ['/css/bootstrap-datetimepicker.min.css'] }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Mark Attendance</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item">Dashboard</li>
+<li class="breadcrumb-item active">Mark Attendance</li>
+</ul>
+</div>
+</div>
+</div>
+
+<% if (typeof saved !== 'undefined' && saved) { %>
+<div class="alert alert-success">Attendance saved for <%= dateStr %>.</div>
+<% } %>
+
+<div class="card">
+<div class="card-body">
+<form method="GET" action="/teacher/attendance" class="form-inline mb-3">
+<label class="mr-2">Date</label>
+<input type="text" name="date" class="form-control datetimepicker mr-2" value="<%= dateStr %>">
+<button type="submit" class="btn btn-outline-primary">Load</button>
+</form>
+
+<% if (students.length === 0) { %>
+<p class="text-muted mb-0">No students found in your class/section (<%= teacher.classRef ? teacher.classRef.name + ' ' + teacher.classRef.section : 'not assigned' %>).</p>
+<% } else { %>
+<form method="POST" action="/teacher/attendance">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<input type="hidden" name="date" value="<%= dateStr %>">
+<div class="table-responsive">
+<table class="table table-hover table-center mb-0">
+<thead>
+<tr>
+<th>Student ID</th>
+<th>Name</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<% students.forEach(function(student) { %>
+<tr>
+<td><%= student.studentId %></td>
+<td><%= student.firstName %> <%= student.lastName %></td>
+<td>
+<select name="status[student-<%= student.id %>]" class="form-control">
+<% statuses.forEach(function(s) { %>
+<option <%= statusByStudentId[student.id] === s ? 'selected' : (!statusByStudentId[student.id] && s === 'Present' ? 'selected' : '') %>><%= s %></option>
+<% }) %>
+</select>
+</td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+<button type="submit" class="btn btn-primary mt-3">Save Attendance</button>
+</form>
+<% } %>
+</div>
+</div>
+
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts', { extraScripts: ['/js/moment.min.js', '/js/bootstrap-datetimepicker.min.js'] }) %>
+</body>
+</html>

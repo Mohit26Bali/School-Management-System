@@ -1,0 +1,50 @@
+<%
+const s = typeof sport !== 'undefined' ? sport : {};
+function val(v) { return v === null || v === undefined ? '' : v; }
+%>
+<div class="row">
+<div class="col-sm-12">
+<div class="card">
+<div class="card-body">
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="alert alert-danger"><%= error %></div>
+<% } %>
+<form method="POST" action="<%= formAction %>">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="row">
+<div class="col-12">
+<h5 class="form-title"><span>Sports Information</span></h5>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Sports ID</label>
+<input type="text" name="sportsId" class="form-control" value="<%= val(s.sportsId) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Sports Name</label>
+<input type="text" name="name" class="form-control" value="<%= val(s.name) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Coach Name</label>
+<input type="text" name="coachName" class="form-control" value="<%= val(s.coachName) %>">
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Started Year</label>
+<input type="text" name="startedYear" class="form-control datetimepicker" value="<%= s.startedYear ? new Date(s.startedYear).toISOString().slice(0,10) : '' %>">
+</div>
+</div>
+<div class="col-12">
+<button type="submit" class="btn btn-primary">Submit</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>

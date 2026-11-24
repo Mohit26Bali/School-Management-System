@@ -1,0 +1,169 @@
+/* Dark mode overrides — applied only when <html class="dark-mode"> is present.
+   Scoped to the shared chrome every authenticated page reuses via partials
+   (header, sidebar, cards, tables, forms, dropdowns) plus the dashboard widgets. */
+
+html.dark-mode body {
+	background-color: #12151c;
+	color: #d7dbe2;
+}
+
+html.dark-mode .page-wrapper {
+	background-color: #12151c;
+}
+
+html.dark-mode .header {
+	background-color: #1a1e28;
+	border-bottom: 1px solid #262b38;
+}
+
+html.dark-mode .header .top-nav-search .form-control {
+	background-color: #262b38;
+	border-color: #313747;
+	color: #d7dbe2;
+}
+
+html.dark-mode #mobile_btn i,
+html.dark-mode #toggle_btn i,
+html.dark-mode .header .nav-link i {
+	color: #d7dbe2;
+}
+
+html.dark-mode .sidebar {
+	background-color: #1a1e28;
+	border-right: 1px solid #262b38;
+}
+
+html.dark-mode .sidebar .menu-title span {
+	color: #6b7280;
+}
+
+html.dark-mode .sidebar-menu ul li a {
+	color: #b7bdc9;
+}
+
+html.dark-mode .sidebar-menu ul li a:hover,
+html.dark-mode .sidebar-menu ul li.active > a,
+html.dark-mode .sidebar-menu ul li.submenu.active > a {
+	color: #ffffff;
+}
+
+html.dark-mode .sidebar-menu li.active > a,
+html.dark-mode .sidebar-menu > ul > li > a:hover {
+	background-color: #20242f;
+	color: #18aefa;
+}
+html.dark-mode .sidebar-menu ul ul a.active {
+	color: #18aefa;
+}
+
+html.dark-mode .sidebar-menu ul ul {
+	background-color: #161a23;
+}
+
+html.dark-mode .card,
+html.dark-mode .card-chart,
+html.dark-mode .loginbox {
+	background-color: #1a1e28;
+	border: 1px solid #262b38;
+	color: #d7dbe2;
+}
+
+html.dark-mode .card-header {
+	background-color: #1a1e28;
+	border-bottom: 1px solid #262b38;
+}
+
+html.dark-mode .page-title,
+html.dark-mode h1, html.dark-mode h2, html.dark-mode h3,
+html.dark-mode h4, html.dark-mode h5, html.dark-mode h6 {
+	color: #eef0f4;
+}
+
+html.dark-mode .breadcrumb-item,
+html.dark-mode .breadcrumb-item a {
+	color: #9aa1ab;
+}
+html.dark-mode .breadcrumb-item.active {
+	color: #d7dbe2;
+}
+
+html.dark-mode .table {
+	color: #d7dbe2;
+}
+html.dark-mode .table thead th {
+	color: #9aa1ab;
+	border-bottom-color: #262b38;
+}
+html.dark-mode .table td,
+html.dark-mode .table th {
+	border-top-color: #262b38;
+}
+html.dark-mode .table-hover tbody tr:hover {
+	background-color: #20242f;
+	color: #eef0f4;
+}
+
+html.dark-mode .form-control {
+	background-color: #20242f;
+	border-color: #313747;
+	color: #d7dbe2;
+}
+html.dark-mode .form-control:focus {
+	background-color: #20242f;
+	border-color: #18aefa;
+	color: #eef0f4;
+}
+html.dark-mode .form-control::placeholder {
+	color: #6b7280;
+}
+html.dark-mode label {
+	color: #b7bdc9;
+}
+html.dark-mode .form-title span {
+	color: #eef0f4;
+}
+
+html.dark-mode .dropdown-menu {
+	background-color: #1a1e28;
+	border-color: #262b38;
+}
+html.dark-mode .dropdown-menu .dropdown-item {
+	color: #d7dbe2;
+}
+html.dark-mode .dropdown-menu .dropdown-item:hover {
+	background-color: #262b38;
+	color: #eef0f4;
+}
+html.dark-mode .notifications,
+html.dark-mode .topnav-dropdown-header,
+html.dark-mode .user-header {
+	border-color: #262b38;
+}
+
+html.dark-mode footer,
+html.dark-mode .footer {
+	color: #6b7280;
+}
+
+html.dark-mode .text-muted {
+	color: #808894 !important;
+}
+
+/* Dashboard KPI widgets (bg-one..eleven) — keep the tinted accent, darken the card body */
+html.dark-mode .db-info h3 {
+	color: #eef0f4;
+}
+html.dark-mode .db-info h6 {
+	color: #b7bdc9;
+}
+
+html.dark-mode .role-tabs {
+	background: #20242f;
+}
+html.dark-mode .role-tab {
+	color: #9aa1ab;
+}
+
+html.dark-mode ::-webkit-scrollbar-track {
+	background: #1a1e28;
+}

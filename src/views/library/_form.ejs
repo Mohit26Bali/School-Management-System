@@ -1,0 +1,87 @@
+<%
+const b = typeof book !== 'undefined' ? book : {};
+function val(v) { return v === null || v === undefined ? '' : v; }
+%>
+<div class="row">
+<div class="col-sm-12">
+<div class="card">
+<div class="card-body">
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="alert alert-danger"><%= error %></div>
+<% } %>
+<form method="POST" action="<%= formAction %>">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="row">
+<div class="col-12">
+<h5 class="form-title"><span>Book Information</span></h5>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Book ID</label>
+<input type="text" name="bookId" class="form-control" value="<%= val(b.bookId) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Book Name</label>
+<input type="text" name="name" class="form-control" value="<%= val(b.name) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Language</label>
+<select name="language" class="form-control select">
+<option value="" <%= !b.language ? 'selected' : '' %>>Select Language</option>
+<% languages.forEach(function(l) { %>
+<option <%= b.language === l ? 'selected' : '' %>><%= l %></option>
+<% }) %>
+</select>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Department</label>
+<input type="text" name="department" class="form-control" value="<%= val(b.department) %>">
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Class</label>
+<select name="classId" class="form-control select">
+<option value="" <%= !b.classId ? 'selected' : '' %>>Select Class</option>
+<% classes.forEach(function(c) { %>
+<option value="<%= c.id %>" <%= Number(b.classId) === c.id ? 'selected' : '' %>><%= c.name %></option>
+<% }) %>
+</select>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Type</label>
+<select name="type" class="form-control select">
+<option value="" <%= !b.type ? 'selected' : '' %>>Select Type</option>
+<% types.forEach(function(t) { %>
+<option <%= b.type === t ? 'selected' : '' %>><%= t %></option>
+<% }) %>
+</select>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Status</label>
+<select name="status" class="form-control select">
+<% statuses.forEach(function(s) { %>
+<option <%= b.status === s ? 'selected' : '' %>><%= s %></option>
+<% }) %>
+</select>
+</div>
+</div>
+<div class="col-12">
+<button type="submit" class="btn btn-primary">Submit</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>

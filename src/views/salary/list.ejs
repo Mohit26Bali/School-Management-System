@@ -1,0 +1,77 @@
+<%- include('../partials/head', { title, extraCss: ['/vendor/datatables/datatables.min.css'] }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Salary</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+<li class="breadcrumb-item active">Salary</li>
+</ul>
+</div>
+<div class="col-auto text-right float-right ml-auto">
+<a href="/salary/add" class="btn btn-primary"><i class="fas fa-plus"></i> Add Salary</a>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-12">
+<div class="card card-table">
+<div class="card-body">
+<div class="table-responsive">
+<table class="table table-hover table-center mb-0 datatable">
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Gender</th>
+<th>Payment Date</th>
+<th>Amount</th>
+<th class="text-right">Action</th>
+</tr>
+</thead>
+<tbody>
+<% if (salaries.length === 0) { %>
+<tr><td colspan="6" class="text-center text-muted">No salary payments yet. <a href="/salary/add">Add the first one</a>.</td></tr>
+<% } %>
+<% salaries.forEach(function(s) { %>
+<tr>
+<td><%= s.teacher.teacherId %></td>
+<td><a href="/teachers/<%= s.teacher.id %>"><%= s.teacher.name %></a></td>
+<td><%= s.teacher.gender || '-' %></td>
+<td><%= s.paymentDate ? s.paymentDate.toDateString() : '-' %></td>
+<td><%= s.amount.toFixed(2) %></td>
+<td class="text-right">
+<div class="actions">
+<a href="/salary/<%= s.id %>/edit" class="btn btn-sm bg-success-light mr-2">
+<i class="fas fa-pen"></i>
+</a>
+<form method="POST" action="/salary/<%= s.id %>/delete" class="d-inline" onsubmit="return confirm('Delete this salary record?');">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<button type="submit" class="btn btn-sm bg-danger-light">
+<i class="fas fa-trash"></i>
+</button>
+</form>
+</div>
+</td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts', { extraScripts: ['/vendor/datatables/datatables.min.js'] }) %>
+</body>
+</html>

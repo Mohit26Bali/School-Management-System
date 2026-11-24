@@ -1,0 +1,26 @@
+<%- include('../partials/head', { title, extraCss: ['/vendor/select2/css/select2.min.css'] }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Edit Book</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/library">Library</a></li>
+<li class="breadcrumb-item active">Edit Book</li>
+</ul>
+</div>
+</div>
+</div>
+<%- include('./_form', { formAction: '/library/' + book.id, book: book, error: typeof error !== 'undefined' ? error : null, languages: languages, classes: classes, types: types, statuses: statuses }) %>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts', { extraScripts: ['/vendor/select2/js/select2.min.js'] }) %>
+</body>
+</html>

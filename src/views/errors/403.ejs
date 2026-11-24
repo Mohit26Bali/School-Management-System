@@ -1,0 +1,21 @@
+<%- include('../partials/head', { title }) %>
+<body class="error-page">
+<div class="main-wrapper">
+<div class="error-box">
+<h1>403</h1>
+<h3 class="h2 mb-3"><i class="fas fa-exclamation-triangle"></i> Access denied</h3>
+<p class="h4 font-weight-normal">You don't have permission to view that page.</p>
+<%
+  let homeHref = "/login";
+  if (typeof sessionUser !== 'undefined' && sessionUser) {
+    if (sessionUser.role === 'admin') homeHref = '/';
+    else if (sessionUser.role === 'teacher') homeHref = '/teacher/dashboard';
+    else if (sessionUser.role === 'student') homeHref = '/student/dashboard';
+  }
+%>
+<a href="<%= homeHref %>" class="btn btn-primary">Back to Dashboard</a>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>

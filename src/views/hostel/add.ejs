@@ -1,0 +1,26 @@
+<%- include('../partials/head', { title, extraCss: ['/vendor/select2/css/select2.min.css'] }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Add Room</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/hostel">Hostel</a></li>
+<li class="breadcrumb-item active">Add Room</li>
+</ul>
+</div>
+</div>
+</div>
+<%- include('./_form', { formAction: '/hostel', room: typeof values !== 'undefined' ? values : {}, error: typeof error !== 'undefined' ? error : null, roomTypes: roomTypes, availabilityOptions: availabilityOptions }) %>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts', { extraScripts: ['/vendor/select2/js/select2.min.js'] }) %>
+</body>
+</html>

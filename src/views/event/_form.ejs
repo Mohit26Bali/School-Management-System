@@ -1,0 +1,44 @@
+<%
+const e = typeof event !== 'undefined' ? event : {};
+function val(v) { return v === null || v === undefined ? '' : v; }
+%>
+<div class="row">
+<div class="col-sm-12">
+<div class="card">
+<div class="card-body">
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="alert alert-danger"><%= error %></div>
+<% } %>
+<form method="POST" action="<%= formAction %>">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="row">
+<div class="col-12">
+<h5 class="form-title"><span>Event Information</span></h5>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Event ID</label>
+<input type="text" name="eventId" class="form-control" value="<%= val(e.eventId) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Event Name</label>
+<input type="text" name="name" class="form-control" value="<%= val(e.name) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Event Date</label>
+<input type="text" name="eventDate" class="form-control datetimepicker" value="<%= e.eventDate ? new Date(e.eventDate).toISOString().slice(0,10) : '' %>">
+</div>
+</div>
+<div class="col-12">
+<button type="submit" class="btn btn-primary">Submit</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>

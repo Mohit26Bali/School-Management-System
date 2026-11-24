@@ -1,0 +1,26 @@
+<%- include('../partials/head', { title, extraCss: ['/css/bootstrap-datetimepicker.min.css'] }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Add Time Table</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/time-table">Time Table</a></li>
+<li class="breadcrumb-item active">Add Time Table</li>
+</ul>
+</div>
+</div>
+</div>
+<%- include('./_form', { formAction: '/time-table', entry: typeof values !== 'undefined' ? { classId: values.classId, subjectId: values.subjectId, date: values.date, startTime: values.startTime, endTime: values.endTime, teacher: { teacherId: values.teacherId } } : {}, error: typeof error !== 'undefined' ? error : null, classes: classes, subjects: subjects }) %>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts', { extraScripts: ['/js/moment.min.js', '/js/bootstrap-datetimepicker.min.js'] }) %>
+</body>
+</html>

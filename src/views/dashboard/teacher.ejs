@@ -1,0 +1,137 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Welcome, <%= sessionUser.name %>!</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item">Dashboard</li>
+<li class="breadcrumb-item active">Teacher Dashboard</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-xl-3 col-sm-6 col-12">
+<div class="card bg-five">
+<div class="card-body d-flex align-items-center">
+<div class="db-icon"><i class="fas fa-chalkboard"></i></div>
+<div class="db-info"><h3><%= classesThisWeek %></h3><h6>Classes This Week</h6></div>
+</div>
+</div>
+</div>
+<div class="col-xl-3 col-sm-6 col-12">
+<div class="card bg-six">
+<div class="card-body d-flex align-items-center">
+<div class="db-icon"><i class="fas fa-user-graduate"></i></div>
+<div class="db-info"><h3><%= totalStudents %></h3><h6>Total Students</h6></div>
+</div>
+</div>
+</div>
+<div class="col-xl-3 col-sm-6 col-12">
+<div class="card bg-seven">
+<div class="card-body d-flex align-items-center">
+<div class="db-icon"><i class="fas fa-book-reader"></i></div>
+<div class="db-info"><h3><%= subjectsTaught %></h3><h6>Subjects Taught</h6></div>
+</div>
+</div>
+</div>
+<div class="col-xl-3 col-sm-6 col-12">
+<div class="card bg-eight">
+<div class="card-body d-flex align-items-center">
+<div class="db-icon"><i class="fas fa-clock"></i></div>
+<div class="db-info"><h3><%= totalHours %></h3><h6>Total Hours</h6></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-lg-8">
+<div class="row">
+<div class="col-12">
+<div class="card">
+<div class="card-body">
+<div class="d-flex justify-content-between align-items-center mb-3">
+<h5 class="mb-0">Upcoming Lessons</h5>
+</div>
+<% if (upcomingLessons.length === 0) { %>
+<p class="text-muted mb-0">No upcoming lessons scheduled.</p>
+<% } else { %>
+<div class="lesson">
+<table class="table mb-0">
+<tbody>
+<% upcomingLessons.forEach(function(lesson) { %>
+<tr>
+<td class="date">
+<b><%= lesson.date ? lesson.date.toLocaleString('en-US', { month: 'short', day: 'numeric' }) : '-' %></b>
+<p><%= lesson.date ? lesson.date.toLocaleString('en-US', { weekday: 'long' }) : '' %></p>
+</td>
+<td><%= lesson.subjectRef ? lesson.subjectRef.name : '-' %><br><span class="text-muted"><%= lesson.classRef ? lesson.classRef.name + ' ' + lesson.classRef.section : '' %> &middot; <%= lesson.startTime %>-<%= lesson.endTime %></span></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+<% } %>
+</div>
+</div>
+</div>
+<div class="col-12">
+<div class="card card-chart">
+<div class="card-body">
+<div class="d-flex justify-content-between align-items-center mb-3">
+<h5 class="mb-0">Teaching Activity</h5>
+</div>
+<div id="teachingActivityChart"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="col-lg-4">
+<div class="card">
+<div class="card-body text-center">
+<div class="circle-bar circle-bar1">
+<div class="circle-graph1" data-percent="<%= semesterProgress %>"><b><%= semesterProgress %>%</b></div>
+</div>
+<div class="dash-info">
+<h6>Semester Progress</h6>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-body">
+<%- include('../partials/calendar', { calendar }) %>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts', { extraScripts: ['/vendor/apexchart/apexcharts.min.js', '/js/circle-progress.min.js'] }) %>
+<script>
+(function () {
+  var isDark = document.documentElement.classList.contains('dark-mode');
+  new ApexCharts(document.querySelector("#teachingActivityChart"), {
+    chart: { height: 280, type: "area", toolbar: { show: false }, foreColor: isDark ? '#b7bdc9' : undefined },
+    theme: { mode: isDark ? 'dark' : 'light' },
+    grid: { borderColor: isDark ? '#262b38' : undefined },
+    dataLabels: { enabled: false },
+    stroke: { curve: "smooth" },
+    series: [{ name: "Classes", data: <%- JSON.stringify(weekSeries) %> }],
+    xaxis: { categories: <%- JSON.stringify(weekLabels) %> }
+  }).render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<%- include('../partials/head', { title, extraCss: ['/vendor/select2/css/select2.min.css', '/css/bootstrap-datetimepicker.min.css'] }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Add Fees Collection</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/fees-collections">Fees Collection</a></li>
+<li class="breadcrumb-item active">Add Fees Collection</li>
+</ul>
+</div>
+</div>
+</div>
+<%- include('./_form', { formAction: '/fees-collections', collection: typeof values !== 'undefined' ? { feesType: values.feesType, amount: values.amount, paidDate: values.paidDate, student: { studentId: values.studentId } } : {}, error: typeof error !== 'undefined' ? error : null, feesTypes: feesTypes }) %>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts', { extraScripts: ['/vendor/select2/js/select2.min.js', '/js/moment.min.js', '/js/bootstrap-datetimepicker.min.js'] }) %>
+</body>
+</html>

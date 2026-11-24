@@ -1,0 +1,68 @@
+<%
+const e = typeof expense !== 'undefined' ? expense : {};
+function val(v) { return v === null || v === undefined ? '' : v; }
+%>
+<div class="row">
+<div class="col-sm-12">
+<div class="card">
+<div class="card-body">
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="alert alert-danger"><%= error %></div>
+<% } %>
+<form method="POST" action="<%= formAction %>">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="row">
+<div class="col-12">
+<h5 class="form-title"><span>Expense Information</span></h5>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Expenses ID</label>
+<input type="text" name="expensesId" class="form-control" value="<%= val(e.expensesId) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Item Name</label>
+<input type="text" name="itemName" class="form-control" value="<%= val(e.itemName) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Item Quality</label>
+<input type="text" name="itemQuality" class="form-control" value="<%= val(e.itemQuality) %>">
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Expense Amount</label>
+<input type="number" step="0.01" min="0" name="amount" class="form-control" value="<%= val(e.amount) %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Source of Purchase</label>
+<input type="text" name="sourceOfPurchase" class="form-control" value="<%= val(e.sourceOfPurchase) %>">
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Purchase Date</label>
+<input type="text" name="purchaseDate" class="form-control datetimepicker" value="<%= e.purchaseDate ? new Date(e.purchaseDate).toISOString().slice(0,10) : '' %>">
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Purchase By</label>
+<input type="text" name="purchaseBy" class="form-control" value="<%= val(e.purchaseBy) %>">
+</div>
+</div>
+<div class="col-12">
+<button type="submit" class="btn btn-primary">Submit</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
