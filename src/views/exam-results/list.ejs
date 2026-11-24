@@ -1,0 +1,62 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Exam Results</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item">Dashboard</li>
+<li class="breadcrumb-item active">Exam Results</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="card card-table">
+<div class="card-body">
+<div class="table-responsive">
+<table class="table table-hover table-center mb-0">
+<thead>
+<tr>
+<th>Exam</th>
+<th>Class</th>
+<th>Subject</th>
+<th>Date</th>
+<th>Max / Pass</th>
+<th>Results entered</th>
+<th class="text-right">Action</th>
+</tr>
+</thead>
+<tbody>
+<% if (exams.length === 0) { %>
+<tr><td colspan="7" class="text-center text-muted">
+<% if (sessionUser.role === 'teacher') { %>No exams for the subjects and classes you teach yet.<% } else { %>No exams yet. <a href="/exam/add">Add one</a> first.<% } %>
+</td></tr>
+<% } %>
+<% exams.forEach(function(exam) { %>
+<tr>
+<td><%= exam.examName %></td>
+<td><%= exam.classRef ? exam.classRef.name : '-' %></td>
+<td><%= exam.subjectRef ? exam.subjectRef.name : '-' %></td>
+<td><%= exam.examDate ? exam.examDate.toDateString() : '-' %></td>
+<td><%= exam.maxMarks %> / <%= exam.passPercent %>%</td>
+<td><%= exam._count.results %></td>
+<td class="text-right"><a href="/exam-results/<%= exam.id %>" class="btn btn-sm btn-outline-primary">Enter results</a></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>

@@ -81,6 +81,7 @@
                <ul>
                   <li><a href="/exam" class="<%= currentPage === 'exam' ? 'active' : '' %>">Exam List</a></li>
                   <li><a href="/exam/add">Add Exam</a></li>
+                  <li><a href="/exam-results" class="<%= currentPage === 'exam-results' ? 'active' : '' %>">Enter Results</a></li>
                </ul>
             </li>
             <li class="submenu <%= currentPage === 'library' ? 'active' : '' %>">
@@ -141,6 +142,9 @@
 <% } else if (sessionUser && sessionUser.role === 'teacher') { %>
             <li class="<%= currentPage === 'attendance' ? 'active' : '' %>">
                <a href="/teacher/attendance"><i class="fas fa-calendar-check"></i> <span>Mark Attendance</span></a>
+            </li>
+            <li class="<%= currentPage === 'exam-results' ? 'active' : '' %>">
+               <a href="/exam-results"><i class="fas fa-clipboard-check"></i> <span>Exam Results</span></a>
             </li>
 <% } else if (sessionUser && sessionUser.role === 'student') { %>
             <li class="<%= currentPage === 'attendance' ? 'active' : '' %>">

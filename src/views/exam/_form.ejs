@@ -67,6 +67,18 @@ function val(v) { return v === null || v === undefined ? '' : v; }
 <input type="text" name="examDate" class="form-control datetimepicker" value="<%= e.examDate ? new Date(e.examDate).toISOString().slice(0,10) : '' %>">
 </div>
 </div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Maximum marks</label>
+<input type="number" step="0.01" min="1" max="1000" name="maxMarks" class="form-control" value="<%= e.maxMarks === undefined || e.maxMarks === null ? 100 : e.maxMarks %>" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Pass mark (% of maximum)</label>
+<input type="number" step="0.01" min="0" max="100" name="passPercent" class="form-control" value="<%= e.passPercent === undefined || e.passPercent === null ? 40 : e.passPercent %>" required>
+</div>
+</div>
 <div class="col-12">
 <button type="submit" class="btn btn-primary">Submit</button>
 </div>

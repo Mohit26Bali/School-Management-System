@@ -23,6 +23,9 @@
 <div class="col-sm-12">
 <div class="card card-table">
 <div class="card-body">
+<% if (typeof notice !== 'undefined' && notice) { %>
+<div class="alert alert-warning"><%= notice %></div>
+<% } %>
 <div class="table-responsive">
 <table class="table table-hover table-center mb-0 datatable">
 <thead>
@@ -50,6 +53,7 @@
 <td><%= exam.examDate ? exam.examDate.toDateString() : '-' %></td>
 <td class="text-right">
 <div class="actions">
+<a href="/exam-results/<%= exam.id %>" class="btn btn-sm bg-info-light mr-2" title="Enter results"><i class="fas fa-clipboard-check"></i></a>
 <a href="/exam/<%= exam.id %>/edit" class="btn btn-sm bg-success-light mr-2">
 <i class="fas fa-pen"></i>
 </a>

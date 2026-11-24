@@ -1,0 +1,75 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title"><%= exam.examName %> - results</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/exam-results">Exam Results</a></li>
+<li class="breadcrumb-item active"><%= exam.subjectRef ? exam.subjectRef.name : 'No subject' %>, class <%= exam.classRef ? exam.classRef.name : '-' %></li>
+</ul>
+</div>
+</div>
+</div>
+
+<% if (saved) { %>
+<div class="alert alert-success">Results saved.</div>
+<% } %>
+<% if (errors && errors.length) { %>
+<div class="alert alert-danger">
+<strong>Nothing was saved.</strong> Please fix:
+<ul class="mb-0">
+<% errors.forEach(function(e) { %><li><%= e %></li><% }) %>
+</ul>
+</div>
+<% } %>
+
+<div class="card">
+<div class="card-body">
+<p class="text-muted">Marks out of <strong><%= exam.maxMarks %></strong>. A student passes with <strong><%= passMark %></strong> or more (<%= exam.passPercent %>%). Leave a box empty for no result (absent).</p>
+<% if (students.length === 0) { %>
+<p class="text-muted mb-0">There are no active students in this class yet.</p>
+<% } else { %>
+<form method="POST" action="/exam-results/<%= exam.id %>">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="table-responsive">
+<table class="table table-hover table-center mb-0">
+<thead>
+<tr>
+<th>Student ID</th>
+<th>Name</th>
+<th>Section</th>
+<th style="width:180px">Marks (out of <%= exam.maxMarks %>)</th>
+</tr>
+</thead>
+<tbody>
+<% students.forEach(function(student) {
+  const shown = entered ? entered[student.id] : (marksByStudent[student.id] !== undefined ? marksByStudent[student.id] : '');
+%>
+<tr>
+<td><%= student.studentId %></td>
+<td><%= student.firstName %> <%= student.lastName %></td>
+<td><%= student.classRef ? student.classRef.section : '-' %></td>
+<td><input type="text" inputmode="decimal" name="marks[student-<%= student.id %>]" class="form-control" value="<%= shown %>" aria-label="Marks for <%= student.firstName %> <%= student.lastName %>"></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+<button type="submit" class="btn btn-primary mt-3">Save results</button>
+</form>
+<% } %>
+</div>
+</div>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>

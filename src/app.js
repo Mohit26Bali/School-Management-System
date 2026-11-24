@@ -31,6 +31,7 @@ const holidayRoutes = require("./routes/holiday");
 const eventRoutes = require("./routes/event");
 const timeTableRoutes = require("./routes/timeTable");
 const searchRoutes = require("./routes/search");
+const examResultsRoutes = require("./routes/examResults");
 const { requireAuth, requireRole } = require("./middleware/auth");
 
 const app = express();
@@ -92,6 +93,7 @@ app.use("/student/dashboard", requireAuth, requireRole("student"), studentDashbo
 app.use("/teacher/attendance", requireAuth, requireRole("teacher"), teacherAttendanceRoutes);
 app.use("/student/attendance", requireAuth, requireRole("student"), studentAttendanceRoutes);
 app.use("/profile", requireAuth, profileRoutes);
+app.use("/exam-results", requireAuth, requireRole("admin", "teacher"), examResultsRoutes);
 app.use("/attendance", requireAuth, requireRole("admin"), attendanceRoutes);
 app.use("/", requireAuth, requireRole("admin"), dashboardRoutes);
 app.use("/students", requireAuth, requireRole("admin"), studentRoutes);

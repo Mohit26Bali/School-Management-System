@@ -40,7 +40,7 @@ Generate a secret with `node -e "console.log(require('crypto').randomBytes(32).t
 npm test
 ```
 
-Starts the real app on a throwaway database and checks login, sessions, CSRF, role access, password reset, attendance rules, uploads and the login rate limit.
+Starts the real app on a throwaway database and checks login, sessions, CSRF, role access, password reset, attendance rules, uploads, the login rate limit, inactive people and exam results.
 
 ### Seeded logins (after running the seed script)
 
@@ -113,6 +113,8 @@ public/                  # static assets: css, js, images, vendor libraries, upl
 - **CSRF protection** — every POST form carries a session-bound `_csrf` token, checked by custom middleware (not the deprecated `csurf` package). File-upload (multipart) routes verify the token _after_ `multer` parses the body, since the request is still multipart at that point.
 - **Security headers** — `helmet` is enabled with CSP explicitly disabled (the UI relies on inline `<script>`/`<style>` blocks throughout for charts, the theme toggle, etc.); the other headers (HSTS, X-Frame-Options, nosniff) are on.
 - **Login rate limiting** — 10 attempts / 15 minutes per IP via `express-rate-limit`, applied to both correct and incorrect attempts (not just failures) to actually stop brute-forcing.
+- **Exam results entry** — admins (any exam) and teachers (only exams for a subject and class they are assigned to) enter marks on a sheet per exam. Each exam has a maximum mark and a pass mark (default 100 and 40%); pass or fail is worked out from those, not typed in. Invalid marks save nothing and name the student; an empty box means no result (absent). Changing the pass mark re-grades entered results; the maximum cannot change once results exist, and an exam with results cannot be deleted.
+- **Inactive instead of deleted** — removing a student or teacher who has attendance, results, payments or salaries marks them inactive (login blocked, hidden from active lists and sheets, records kept) and they can be reactivated; someone with no history is deleted completely. Lists have Active / Inactive / All tabs.
 - **Attendance tracking** — teachers mark daily Present/Absent/Late per student in their homeroom; admins get a filterable report; students see their own history and an attendance-percentage KPI on their dashboard.
 - **Dark mode** — a manual, persisted toggle (cookie-based) in the header; the theme class is applied to `<html>` via a blocking inline script in `<head>` to avoid a flash of the wrong theme on load.
 - **DataTables / Select2 / datepicker / input masking** — wired up on list pages and forms (search, sort, pagination on tables; searchable dropdowns for class/subject/etc.; a real date picker instead of raw `<input type="date">`; masked phone number inputs).

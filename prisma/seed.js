@@ -81,7 +81,7 @@ const sampleExpenses = [
 const sampleExams = [
   { examName: "Mid Term Exam", class: "10", subject: "Computer Science", fees: 50, startTime: "09:00", endTime: "11:00", monthsAgoOffset: 4 },
   { examName: "Final Exam", class: "9", subject: "English", fees: 75, startTime: "10:00", endTime: "12:30", monthsAgoOffset: 2 },
-  { examName: "Unit Test 3", class: "10", subject: "Mathematics", fees: 30, startTime: "09:00", endTime: "10:30", monthsAgoOffset: 1 },
+  { examName: "Unit Test 3", class: "10", subject: "Mathematics", maxMarks: 30, fees: 30, startTime: "09:00", endTime: "10:30", monthsAgoOffset: 1 },
 ];
 
 const sampleExamResults = [
@@ -350,6 +350,7 @@ async function main() {
           classId,
           subjectId: subjectRow ? subjectRow.id : null,
           fees: ex.fees,
+          maxMarks: ex.maxMarks || 100,
           startTime: ex.startTime,
           endTime: ex.endTime,
           examDate,

@@ -165,6 +165,8 @@ model Exam {
   startTime  String?
   endTime    String?
   examDate   DateTime?
+  maxMarks    Float     @default(100)
+  passPercent Float     @default(40)
   createdAt  DateTime  @default(now())
 
   results    ExamResult[]
@@ -181,6 +183,8 @@ model ExamResult {
   examId         Int
   student        Student  @relation(fields: [studentId], references: [id])
   studentId      Int
+
+  @@unique([examId, studentId])
 }
 
 model Book {
