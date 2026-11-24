@@ -77,7 +77,7 @@ Version      : 1.0
 	
 	// Select 2
 	
-    if ($('.select').length > 0) {
+    if ($('.select').length > 0 && typeof $.fn.select2 === 'function') {
         $('.select').select2({
             minimumResultsForSearch: -1,
             width: '100%'
@@ -112,7 +112,11 @@ Version      : 1.0
     // Datatable
 
     if ($('.datatable').length > 0) {
-        $('.datatable').DataTable();
+        $('.datatable').each(function () {
+            // A table showing only a "nothing here yet" row (one cell spanning the columns) cannot be turned into a DataTable
+            if ($(this).find('td[colspan]').length) return;
+            $(this).DataTable();
+        });
     }
 
     // Masked phone inputs

@@ -1,4 +1,4 @@
-<%- include('../partials/head', { title, extraCss: ['/css/bootstrap-datetimepicker.min.css'] }) %>
+<%- include('../partials/head', { title, extraCss: ['/vendor/select2/css/select2.min.css', '/css/bootstrap-datetimepicker.min.css'] }) %>
 <body>
 <div class="main-wrapper">
 <%- include('../partials/header', { user: sessionUser }) %>
@@ -21,6 +21,6 @@
 <%- include('../partials/footer') %>
 </div>
 </div>
-<%- include('../partials/scripts', { extraScripts: ['/js/moment.min.js', '/js/bootstrap-datetimepicker.min.js'] }) %>
+<%- include('../partials/scripts', { extraScripts: ['/vendor/select2/js/select2.min.js', '/js/moment.min.js', '/js/bootstrap-datetimepicker.min.js'] }) %>
 </body>
 </html>
