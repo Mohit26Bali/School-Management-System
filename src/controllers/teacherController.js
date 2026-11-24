@@ -3,6 +3,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const { PrismaClient } = require("@prisma/client");
 const { setPortalLogin } = require("../utils/portalAccounts");
+const { setFlash } = require("../utils/flash");
 const { getClasses, getSubjects, findClassById } = require("../utils/academicOptions");
 const { teacherProblems } = require("../utils/people");
 const { passwordProblem } = require("../utils/passwords");
@@ -222,7 +223,6 @@ async function showDetails(req, res) {
     currentPage: "teachers",
     teacher,
     portalUser: teacher.userId ? await prisma.user.findUnique({ where: { id: teacher.userId } }) : null,
-    portalMessage: portalMessage(req.query),
   });
 }
 
@@ -247,21 +247,16 @@ async function remove(req, res) {
   res.redirect("/teachers?notice=deleted");
 }
 
-function portalMessage(query) {
-  if (query.login === "created") return { type: "success", text: "Login created. Share the email and password with them in person." };
-  if (query.login === "updated") return { type: "success", text: "Login updated. They were signed out everywhere and must use the new password." };
-  if (typeof query.loginError === "string") return { type: "danger", text: query.loginError.slice(0, 200) };
-  return null;
-}
-
 // Admin gives this person a portal login, or resets the password of the one they have.
 async function setLogin(req, res) {
   const id = Number(req.params.id);
   const person = await prisma.teacher.findUnique({ where: { id } });
   if (!person) return res.status(404).render("errors/404", { title: "Not Found" });
   const result = await setPortalLogin(prisma, person, "teacher", req.body);
-  if (result.error) return res.redirect(`/teachers/${id}?loginError=${encodeURIComponent(result.error)}`);
-  res.redirect(`/teachers/${id}?login=${result.created ? "created" : "updated"}`);
+  if (result.error) setFlash(req, "danger", result.error);
+  else if (result.created) setFlash(req, "success", "Login created. Share the email and password with them in person.");
+  else setFlash(req, "success", "Login updated. They were signed out everywhere and must use the new password.");
+  res.redirect(`/teachers/${id}`);
 }
 
 async function reactivate(req, res) {

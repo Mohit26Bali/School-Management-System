@@ -1,0 +1,70 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Book Loans</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/library">Library</a></li>
+<li class="breadcrumb-item active">Loans</li>
+</ul>
+</div>
+<div class="col-auto text-right float-right ml-auto">
+<a href="/library/loans/issue" class="btn btn-primary"><i class="fas fa-plus"></i> Issue a book</a>
+</div>
+</div>
+</div>
+<%- include('../partials/flash') %>
+<ul class="nav nav-pills mb-3">
+<li class="nav-item"><a class="nav-link <%= show === 'open' ? 'active' : '' %>" href="/library/loans">Out now</a></li>
+<li class="nav-item"><a class="nav-link <%= show === 'history' ? 'active' : '' %>" href="/library/loans?show=history">Returned</a></li>
+</ul>
+<div class="card card-table">
+<div class="card-body">
+<p class="text-muted">Loans last <%= cfg.loanDays %> days, a student may have <%= cfg.maxLoans %> books out, and each late day costs <%= cfg.finePerDay.toFixed(2) %>.</p>
+<div class="table-responsive">
+<table class="table table-hover table-center mb-0">
+<thead>
+<tr><th>Book</th><th>Student</th><th>Issued</th><th>Due</th><% if (show === 'history') { %><th>Returned</th><th class="text-right">Fine</th><% } else { %><th>Status</th><th></th><% } %></tr>
+</thead>
+<tbody>
+<% if (loans.length === 0) { %>
+<tr><td colspan="6" class="text-center text-muted"><%= show === 'open' ? 'No books are out right now.' : 'Nothing returned yet.' %></td></tr>
+<% } %>
+<% loans.forEach(function(l) { const overdue = !l.returnedOn && l.dueOn < now; %>
+<tr>
+<td><%= l.book.name %> <small class="text-muted">(<%= l.book.bookId %>)</small></td>
+<td><%= l.student.firstName %> <%= l.student.lastName %> <small class="text-muted">(<%= l.student.studentId %>)</small></td>
+<td><%= l.issuedOn.toDateString() %></td>
+<td><%= l.dueOn.toDateString() %></td>
+<% if (show === 'history') { %>
+<td><%= l.returnedOn.toDateString() %></td>
+<td class="text-right"><%= l.fine > 0 ? l.fine.toFixed(2) : '-' %></td>
+<% } else { %>
+<td><% if (overdue) { %><span class="badge badge-danger">Overdue</span><% } else { %><span class="badge badge-success">On time</span><% } %></td>
+<td class="text-right">
+<form method="POST" action="/library/loans/<%= l.id %>/return" class="d-inline">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<button type="submit" class="btn btn-sm btn-outline-primary">Return</button>
+</form>
+</td>
+<% } %>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>

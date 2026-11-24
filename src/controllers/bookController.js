@@ -1,5 +1,6 @@
 const { wrapController } = require("../utils/asyncHandler");
 const { PrismaClient } = require("@prisma/client");
+const { setFlash } = require("../utils/flash");
 const { getClassesByNameOnly } = require("../utils/academicOptions");
 
 const prisma = new PrismaClient();
@@ -87,12 +88,30 @@ async function update(req, res) {
     }
   }
 
+  // A book that is out on loan stays "Out of Stock" until it is returned at the Loans desk.
+  if (data.status === "In Stock" && (await prisma.loan.findFirst({ where: { bookId: id, returnedOn: null } }))) {
+    return res.status(400).render("library/edit", {
+      title: "Edit Book",
+      currentPage: "library",
+      book: { ...book, ...req.body },
+      ...(await formOptions()),
+      error: "This book is out on loan, so it cannot be marked In Stock. Return it under Book Loans first.",
+    });
+  }
+
   await prisma.book.update({ where: { id }, data });
   res.redirect("/library");
 }
 
 async function remove(req, res) {
-  await prisma.book.delete({ where: { id: Number(req.params.id) } });
+  const id = Number(req.params.id);
+  if (!(await prisma.book.findUnique({ where: { id } }))) return res.status(404).render("errors/404", { title: "Not Found" });
+  // Lending history is kept, so a book that has ever been lent cannot be deleted.
+  if ((await prisma.loan.count({ where: { bookId: id } })) > 0) {
+    setFlash(req, "warning", "That book has lending history, so it cannot be deleted. Mark it Out of Stock instead.");
+    return res.redirect("/library");
+  }
+  await prisma.book.delete({ where: { id } });
   res.redirect("/library");
 }
 

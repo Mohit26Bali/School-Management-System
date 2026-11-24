@@ -16,8 +16,7 @@
 </div>
 </div>
 </div>
-<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
-<% if (saved) { %><div class="alert alert-success">Capacity saved.</div><% } %>
+<%- include('../partials/flash') %>
 <div class="card card-table">
 <div class="card-body">
 <p class="text-muted">A class cannot take more active students than its capacity. The default is 40.</p>

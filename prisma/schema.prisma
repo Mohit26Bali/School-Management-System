@@ -55,6 +55,7 @@ model Student {
 
   feesCollections   FeesCollection[]
   examResults       ExamResult[]
+  loans             Loan[]
   attendance        Attendance[]
 }
 
@@ -197,6 +198,7 @@ model Book {
   classRef    Class?   @relation(fields: [classId], references: [id])
   type        String?
   status      String   @default("In Stock")
+  loans       Loan[]
   createdAt   DateTime @default(now())
 }
 
@@ -328,4 +330,21 @@ model AuditLog {
 
   @@index([entity, entityId])
   @@index([createdAt])
+}
+
+// A library book lent to a student. A loan with no returnedOn is still open.
+model Loan {
+  id         Int       @id @default(autoincrement())
+  book       Book      @relation(fields: [bookId], references: [id])
+  bookId     Int
+  student    Student   @relation(fields: [studentId], references: [id])
+  studentId  Int
+  issuedOn   DateTime
+  dueOn      DateTime
+  returnedOn DateTime?
+  fine       Float     @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([bookId])
+  @@index([studentId])
 }

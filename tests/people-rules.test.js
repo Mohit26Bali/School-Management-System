@@ -116,14 +116,17 @@ test("the Classes page changes capacity, within limits", async () => {
   assert.equal(page.status, 200);
   assert.match(page.text, /Capacity/);
 
-  assert.equal((await admin.send(`/classes/${small.id}/capacity`, { capacity: "30" })).headers.get("location"), `/classes?saved=${small.id}`);
+  assert.equal((await admin.send(`/classes/${small.id}/capacity`, { capacity: "30" })).headers.get("location"), "/classes");
+  assert.match((await admin.get("/classes")).text, /set to 30/);
   assert.equal((await prisma.class.findUnique({ where: { id: small.id } })).capacity, 30);
   for (const bad of ["0", "201", "-1", "abc", "", "1.5"]) {
     const res = await admin.send(`/classes/${small.id}/capacity`, { capacity: bad });
-    assert.match(res.headers.get("location"), /error=/, bad);
+    assert.equal(res.headers.get("location"), "/classes", bad);
+    assert.match((await admin.get("/classes")).text, /alert-danger/, `${bad} is explained on the page`);
   }
   const tooLow = await admin.send(`/classes/${small.id}/capacity`, { capacity: "1" });
-  assert.match(decodeURIComponent(tooLow.headers.get("location")), /cannot be below 2/);
+  assert.equal(tooLow.headers.get("location"), "/classes");
+  assert.match((await admin.get("/classes")).text, /cannot be below 2/);
   assert.equal((await prisma.class.findUnique({ where: { id: small.id } })).capacity, 30);
   assert.equal((await admin.send("/classes/99999/capacity", { capacity: "10" })).status, 404);
 

@@ -1,0 +1,51 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Issue a Book</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/library/loans">Loans</a></li>
+<li class="breadcrumb-item active">Issue</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-body">
+<% if (typeof error !== 'undefined' && error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+<form method="POST" action="/library/loans">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="row">
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Book ID</label>
+<input type="text" name="bookId" class="form-control" value="<%= typeof values !== 'undefined' && typeof values.bookId === 'string' ? values.bookId : '' %>" placeholder="e.g. BK1001" required>
+</div>
+</div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Student ID</label>
+<input type="text" name="studentId" class="form-control" value="<%= typeof values !== 'undefined' && typeof values.studentId === 'string' ? values.studentId : '' %>" placeholder="e.g. PRE2209" required>
+</div>
+</div>
+<div class="col-12">
+<p class="text-muted">Due back in <%= cfg.loanDays %> days. A student can have up to <%= cfg.maxLoans %> books out and cannot borrow while one is overdue.</p>
+<button type="submit" class="btn btn-primary">Issue</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <div class="card">
 <div class="card-body">
 <h5 class="mb-3">Portal login</h5>
-<% if (portalMessage) { %><div class="alert alert-<%= portalMessage.type %>"><%= portalMessage.text %></div><% } %>
+<%- include('flash') %>
 <% if (portalUser) { %>
 <p class="mb-2">Signs in as <strong><%= portalUser.email %></strong>
 <% if (!portalUser.active) { %><span class="badge badge-secondary">inactive: cannot sign in</span><% } %></p>

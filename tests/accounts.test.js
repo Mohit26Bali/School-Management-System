@@ -32,12 +32,12 @@ test("an admin can give a student a login, and the student can then sign in", as
   assert.match(page.text, /No login yet/);
 
   const res = await admin.send(`/students/${st.id}/login`, { email: "  New.Student@School.test ", password: "first-password-1" });
-  assert.equal(res.headers.get("location"), `/students/${st.id}?login=created`);
+  assert.equal(res.headers.get("location"), `/students/${st.id}`);
   const user = await prisma.user.findUnique({ where: { email: "new.student@school.test" } });
   assert.equal(user.role, "student");
   assert.equal(user.name, "No Login");
   assert.equal((await prisma.student.findUnique({ where: { id: st.id } })).userId, user.id);
-  assert.match((await admin.get(`/students/${st.id}?login=created`)).text, /Login created/);
+  assert.match((await admin.get(`/students/${st.id}`)).text, /Login created/);
 
   assert.equal((await ctx.browser().login("new.student@school.test", "first-password-1", "student")).status, 302);
 });
@@ -48,7 +48,7 @@ test("resetting a password signs the person out everywhere and the old password 
   assert.equal((await user.get("/student/dashboard")).status, 200);
 
   const res = await admin.send(`/students/${s.inClass.id}/login`, { email: "student@test.local", password: "reset-by-admin-1" });
-  assert.equal(res.headers.get("location"), `/students/${s.inClass.id}?login=updated`);
+  assert.equal(res.headers.get("location"), `/students/${s.inClass.id}`);
 
   assert.equal((await user.get("/student/dashboard")).headers.get("location"), "/login", "the open session is gone");
   assert.equal((await ctx.browser().login("student@test.local", "password123", "student")).status, 401);
@@ -57,21 +57,27 @@ test("resetting a password signs the person out everywhere and the old password 
 
 test("an admin can create and reset a teacher login too", async () => {
   const t = await prisma.teacher.create({ data: { teacherId: "T-LOGIN", name: "Login Teacher" } });
-  assert.equal((await admin.send(`/teachers/${t.id}/login`, { email: "lt@school.test", password: "teacher-pass-1" })).headers.get("location"), `/teachers/${t.id}?login=created`);
+  assert.equal((await admin.send(`/teachers/${t.id}/login`, { email: "lt@school.test", password: "teacher-pass-1" })).headers.get("location"), `/teachers/${t.id}`);
   assert.equal((await ctx.browser().login("lt@school.test", "teacher-pass-1", "teacher")).status, 302);
-  assert.equal((await admin.send(`/teachers/${t.id}/login`, { email: "lt@school.test", password: "teacher-pass-2" })).headers.get("location"), `/teachers/${t.id}?login=updated`);
+  assert.equal((await admin.send(`/teachers/${t.id}/login`, { email: "lt@school.test", password: "teacher-pass-2" })).headers.get("location"), `/teachers/${t.id}`);
   assert.equal((await ctx.browser().login("lt@school.test", "teacher-pass-1", "teacher")).status, 401);
 });
 
 test("bad logins are refused with a reason: weak password, bad email, email already used", async () => {
   const t = await prisma.teacher.create({ data: { teacherId: "T-BAD", name: "Bad Cases" } });
-  const attempt = async (body) => decodeURIComponent((await admin.send(`/teachers/${t.id}/login`, body)).headers.get("location"));
+  // the reason is shown once on the page the admin lands on
+  const reasonAfter = async () => (/alert-danger">([^<]+)/.exec((await admin.get(`/teachers/${t.id}`)).text) || [])[1] || "";
+  const attempt = async (body) => {
+    await admin.send(`/teachers/${t.id}/login`, body);
+    return reasonAfter();
+  };
   assert.match(await attempt({ email: "ok@school.test", password: "short" }), /at least 8/);
   assert.match(await attempt({ email: "not-an-email", password: "long-enough-1" }), /valid email/);
   assert.match(await attempt({ email: "", password: "long-enough-1" }), /valid email/);
   assert.match(await attempt({ email: "admin@test.local", password: "long-enough-1" }), /already used by another account/);
   const odd = await admin.postRaw(`/teachers/${t.id}/login`, `_csrf=${await admin.csrf()}&email[]=a@b.test&password=long-enough-1`, { "content-type": "application/x-www-form-urlencoded" });
-  assert.match(decodeURIComponent(odd.headers.get("location")), /valid email/, "an array for the email is refused");
+  assert.equal(odd.headers.get("location"), `/teachers/${t.id}`);
+  assert.match(await reasonAfter(), /valid email/, "an array for the email is refused");
   assert.equal((await prisma.teacher.findUnique({ where: { id: t.id } })).userId, null, "nothing was created");
 });
 

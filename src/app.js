@@ -35,6 +35,7 @@ const examResultsRoutes = require("./routes/examResults");
 const auditRoutes = require("./routes/audit");
 const classRoutes = require("./routes/classes");
 const { auditContext } = require("./utils/audit");
+const { flashMiddleware } = require("./utils/flash");
 const { requireAuth, requireRole } = require("./middleware/auth");
 
 const app = express();
@@ -85,6 +86,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(flashMiddleware);
 app.use(auditContext);
 app.use(ensureCsrfToken);
 app.use(verifyCsrfToken);
