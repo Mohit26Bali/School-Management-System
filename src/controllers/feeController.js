@@ -19,7 +19,12 @@ function fieldsFromBody(body) {
 
 async function list(req, res) {
   const fees = await prisma.fee.findMany({ orderBy: { id: "desc" }, include: { classRef: true } });
-  res.render("fees/list", { title: "Fees", currentPage: "fees", fees });
+  res.render("fees/list", {
+    title: "Fees",
+    currentPage: "fees",
+    fees,
+    notice: req.query.notice === "has-payments" ? "Payments have been collected for that fee, so it cannot be deleted." : null,
+  });
 }
 
 async function showAdd(req, res) {
@@ -88,7 +93,15 @@ async function update(req, res) {
 }
 
 async function remove(req, res) {
-  await prisma.fee.delete({ where: { id: Number(req.params.id) } });
+  const id = Number(req.params.id);
+  const fee = await prisma.fee.findUnique({ where: { id }, include: { classRef: true } });
+  if (!fee) return res.status(404).render("errors/404", { title: "Not Found" });
+  // Payments are recorded against the fee type; deleting the schedule line would leave them with nothing they were paid against.
+  const paid = await prisma.feesCollection.count({
+    where: { feesType: fee.feesType, ...(fee.classRef ? { student: { classRef: { name: fee.classRef.name } } } : {}) },
+  });
+  if (paid > 0) return res.redirect("/fees?notice=has-payments");
+  await prisma.fee.delete({ where: { id } });
   res.redirect("/fees");
 }
 

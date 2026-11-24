@@ -1,0 +1,55 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Outstanding Fees</h3>
+<ul class="breadcrumb">
+<li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+<li class="breadcrumb-item active">Outstanding Fees</li>
+</ul>
+</div>
+<div class="col-auto text-right float-right ml-auto">
+<a href="/fees-collections/add" class="btn btn-primary"><i class="fas fa-plus"></i> Record payment</a>
+</div>
+</div>
+</div>
+<div class="card card-table">
+<div class="card-body">
+<p class="text-muted">Active students who still owe money on the fee schedule. Total outstanding: <strong><%= grandTotal.toFixed(2) %></strong> across <strong><%= rows.length %></strong> students.</p>
+<div class="table-responsive">
+<table class="table table-hover table-center mb-0">
+<thead>
+<tr><th>Student ID</th><th>Name</th><th>Class</th><th class="text-right">Due</th><th class="text-right">Paid</th><th class="text-right">Outstanding</th></tr>
+</thead>
+<tbody>
+<% if (rows.length === 0) { %>
+<tr><td colspan="6" class="text-center text-muted">Nobody owes anything. All fees are paid.</td></tr>
+<% } %>
+<% rows.forEach(function(r) { %>
+<tr>
+<td><%= r.student.studentId %></td>
+<td><a href="/students/<%= r.student.id %>"><%= r.student.firstName %> <%= r.student.lastName %></a></td>
+<td><%= r.student.classRef ? r.student.classRef.name + ' ' + r.student.classRef.section : '-' %></td>
+<td class="text-right"><%= r.totalDue.toFixed(2) %></td>
+<td class="text-right"><%= r.totalPaid.toFixed(2) %></td>
+<td class="text-right"><strong class="text-danger"><%= r.totalOutstanding.toFixed(2) %></strong></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>

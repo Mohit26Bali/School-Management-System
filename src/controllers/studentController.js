@@ -2,6 +2,7 @@ const { wrapController } = require("../utils/asyncHandler");
 const path = require("path");
 const { PrismaClient } = require("@prisma/client");
 const { getClasses, findClassById } = require("../utils/academicOptions");
+const { statementFor } = require("../utils/feeBalance");
 
 const prisma = new PrismaClient();
 
@@ -135,7 +136,7 @@ async function update(req, res) {
 async function showDetails(req, res) {
   const student = await prisma.student.findUnique({ where: { id: Number(req.params.id) }, include: { classRef: true } });
   if (!student) return res.status(404).render("errors/404", { title: "Not Found" });
-  res.render("students/details", { title: "Student Details", currentPage: "students", student });
+  res.render("students/details", { title: "Student Details", currentPage: "students", student, statement: await statementFor(prisma, student) });
 }
 
 // A student with attendance, exam results or fee payments is never erased: school records must stay complete.

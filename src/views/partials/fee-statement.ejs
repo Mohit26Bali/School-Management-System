@@ -1,0 +1,36 @@
+<div class="card">
+<div class="card-body">
+<h5 class="mb-3">Fees</h5>
+<% if (!statement.lines.length) { %>
+<p class="text-muted mb-0">No fees are set for this class yet.</p>
+<% } else { %>
+<div class="table-responsive">
+<table class="table table-sm table-center mb-0">
+<thead>
+<tr><th>Fee</th><th class="text-right">Due</th><th class="text-right">Paid</th><th class="text-right">Outstanding</th></tr>
+</thead>
+<tbody>
+<% statement.lines.forEach(function(l) { %>
+<tr>
+<td><%= l.feesType %></td>
+<td class="text-right"><%= l.due.toFixed(2) %></td>
+<td class="text-right"><%= l.paid.toFixed(2) %></td>
+<td class="text-right">
+<% if (l.outstanding > 0) { %><strong class="text-danger"><%= l.outstanding.toFixed(2) %></strong>
+<% } else if (l.overpaid > 0) { %><span class="text-info">Credit <%= l.overpaid.toFixed(2) %></span>
+<% } else { %><span class="text-success">Paid</span><% } %>
+</td>
+</tr>
+<% }) %>
+</tbody>
+<tfoot>
+<tr><th>Total</th><th class="text-right"><%= statement.totalDue.toFixed(2) %></th><th class="text-right"><%= statement.totalPaid.toFixed(2) %></th><th class="text-right"><%= statement.totalOutstanding.toFixed(2) %></th></tr>
+</tfoot>
+</table>
+</div>
+<% if (statement.lines.some(function(l) { return l.due === 0 && l.paid > 0; })) { %>
+<p class="small text-muted mt-2 mb-0">A payment for a fee that is not on the schedule for this class shows as credit for that fee only. It does not reduce what is owed on other fees.</p>
+<% } %>
+<% } %>
+</div>
+</div>

@@ -4,6 +4,7 @@ const feesCollectionController = require("../controllers/feesCollectionControlle
 
 router.get("/", feesCollectionController.list);
 router.get("/add", feesCollectionController.showAdd);
+router.get("/outstanding", feesCollectionController.outstanding);
 router.post("/", feesCollectionController.create);
 router.get("/:id/edit", feesCollectionController.showEdit);
 router.get("/:id/invoice", feesCollectionController.showInvoice);

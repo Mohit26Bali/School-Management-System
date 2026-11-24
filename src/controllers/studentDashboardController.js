@@ -1,4 +1,5 @@
 const { wrapController } = require("../utils/asyncHandler");
+const { statementFor } = require("../utils/feeBalance");
 const { PrismaClient } = require("@prisma/client");
 const { buildCalendar, buildHighlightsForCurrentMonth } = require("../utils/calendar");
 
@@ -49,8 +50,11 @@ async function showDashboard(req, res) {
 
   const calendar = buildCalendar(buildHighlightsForCurrentMonth(holidays, events));
 
+  const statement = await statementFor(prisma, student);
+
   res.render("dashboard/student", {
     title: "Dashboard",
+    statement,
     currentPage: "dashboard",
     student,
     subjectsCount,

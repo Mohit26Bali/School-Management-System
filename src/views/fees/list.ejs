@@ -23,6 +23,9 @@
 <div class="col-sm-12">
 <div class="card card-table">
 <div class="card-body">
+<% if (typeof notice !== 'undefined' && notice) { %>
+<div class="alert alert-warning"><%= notice %></div>
+<% } %>
 <div class="table-responsive">
 <table class="table table-hover table-center mb-0 datatable">
 <thead>
