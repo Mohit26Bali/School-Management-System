@@ -1,7 +1,9 @@
 const { wrapController } = require("../utils/asyncHandler");
-const { PrismaClient } = require("@prisma/client");
+const { auditedClient } = require("../utils/audit");
+const { parseAmount } = require("../utils/money");
 
-const prisma = new PrismaClient();
+// Writes to money records are recorded in the audit log (see utils/audit.js)
+const prisma = auditedClient();
 
 async function list(req, res) {
   const salaries = await prisma.salary.findMany({
@@ -16,19 +18,20 @@ function showAdd(req, res) {
 }
 
 async function create(req, res) {
-  const { teacherId, amount, paymentDate } = req.body;
-  const parsedAmount = amount ? parseFloat(amount) : null;
+  const { teacherId, paymentDate } = req.body;
+  const amount = parseAmount(req.body.amount, "The amount");
+  const parsedAmount = amount.value;
 
-  if (!teacherId || parsedAmount === null || Number.isNaN(parsedAmount)) {
+  if (!teacherId || typeof teacherId !== "string" || amount.error) {
     return res.status(400).render("salary/add", {
       title: "Add Salary",
       currentPage: "salary",
-      error: "Staff ID and a valid Amount are required.",
+      error: amount.error || "Staff ID is required.",
       values: req.body,
     });
   }
 
-  const teacher = await prisma.teacher.findUnique({ where: { teacherId } });
+  const teacher = await prisma.teacher.findFirst({ where: { teacherId, active: true } });
   if (!teacher) {
     return res.status(400).render("salary/add", {
       title: "Add Salary",
@@ -59,11 +62,22 @@ async function showEdit(req, res) {
 
 async function update(req, res) {
   const id = Number(req.params.id);
-  const { teacherId, amount, paymentDate } = req.body;
-  const parsedAmount = amount ? parseFloat(amount) : null;
+  const { paymentDate } = req.body;
+  const teacherId = typeof req.body.teacherId === "string" ? req.body.teacherId : "";
+  const amount = parseAmount(req.body.amount, "The amount");
+  const parsedAmount = amount.value;
 
   const salary = await prisma.salary.findUnique({ where: { id }, include: { teacher: true } });
   if (!salary) return res.status(404).render("errors/404", { title: "Not Found" });
+
+  if (amount.error) {
+    return res.status(400).render("salary/edit", {
+      title: "Edit Salary",
+      currentPage: "salary",
+      salary: { ...salary, ...req.body, teacher: { teacherId } },
+      error: amount.error,
+    });
+  }
 
   const teacher = await prisma.teacher.findUnique({ where: { teacherId } });
   if (!teacher) {
@@ -87,7 +101,9 @@ async function update(req, res) {
 }
 
 async function remove(req, res) {
-  await prisma.salary.delete({ where: { id: Number(req.params.id) } });
+  const id = Number(req.params.id);
+  if (!(await prisma.salary.findUnique({ where: { id } }))) return res.status(404).render("errors/404", { title: "Not Found" });
+  await prisma.salary.delete({ where: { id } });
   res.redirect("/salary");
 }
 

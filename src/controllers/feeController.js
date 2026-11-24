@@ -1,6 +1,7 @@
 const { wrapController } = require("../utils/asyncHandler");
 const { PrismaClient } = require("@prisma/client");
 const { getClassesByNameOnly } = require("../utils/academicOptions");
+const { parseAmount } = require("../utils/money");
 
 const prisma = new PrismaClient();
 
@@ -34,13 +35,14 @@ async function showAdd(req, res) {
 async function create(req, res) {
   const data = fieldsFromBody(req.body);
 
-  if (!data.feesId || !data.feesType || data.amount === null || Number.isNaN(data.amount)) {
+  const amount = parseAmount(req.body.amount, "The amount");
+  if (!data.feesId || !FEES_TYPES.includes(data.feesType) || amount.error) {
     return res.status(400).render("fees/add", {
       title: "Add Fees",
       currentPage: "fees",
       feesTypes: FEES_TYPES,
       classes: await getClassesByNameOnly(),
-      error: "Fees ID, Fees Type, and a valid Amount are required.",
+      error: amount.error || "Fees ID and Fees Type are required.",
       values: req.body,
     });
   }
@@ -73,6 +75,18 @@ async function update(req, res) {
 
   const fee = await prisma.fee.findUnique({ where: { id } });
   if (!fee) return res.status(404).render("errors/404", { title: "Not Found" });
+
+  const amount = parseAmount(req.body.amount, "The amount");
+  if (!data.feesId || !FEES_TYPES.includes(data.feesType) || amount.error) {
+    return res.status(400).render("fees/edit", {
+      title: "Edit Fees",
+      currentPage: "fees",
+      fee: { ...fee, ...req.body },
+      feesTypes: FEES_TYPES,
+      classes: await getClassesByNameOnly(),
+      error: amount.error || "Fees ID and a valid Fees Type are required.",
+    });
+  }
 
   if (data.feesId !== fee.feesId) {
     const existing = await prisma.fee.findUnique({ where: { feesId: data.feesId } });

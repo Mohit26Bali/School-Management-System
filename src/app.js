@@ -32,6 +32,8 @@ const eventRoutes = require("./routes/event");
 const timeTableRoutes = require("./routes/timeTable");
 const searchRoutes = require("./routes/search");
 const examResultsRoutes = require("./routes/examResults");
+const auditRoutes = require("./routes/audit");
+const { auditContext } = require("./utils/audit");
 const { requireAuth, requireRole } = require("./middleware/auth");
 
 const app = express();
@@ -82,6 +84,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(auditContext);
 app.use(ensureCsrfToken);
 app.use(verifyCsrfToken);
 app.use(attachNotifications);
@@ -95,6 +98,7 @@ app.use("/student/attendance", requireAuth, requireRole("student"), studentAtten
 app.use("/profile", requireAuth, profileRoutes);
 app.use("/exam-results", requireAuth, requireRole("admin", "teacher"), examResultsRoutes);
 app.use("/attendance", requireAuth, requireRole("admin"), attendanceRoutes);
+app.use("/audit", requireAuth, requireRole("admin"), auditRoutes);
 app.use("/", requireAuth, requireRole("admin"), dashboardRoutes);
 app.use("/students", requireAuth, requireRole("admin"), studentRoutes);
 app.use("/teachers", requireAuth, requireRole("admin"), teacherRoutes);

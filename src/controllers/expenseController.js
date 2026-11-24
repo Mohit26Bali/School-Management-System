@@ -1,7 +1,9 @@
 const { wrapController } = require("../utils/asyncHandler");
-const { PrismaClient } = require("@prisma/client");
+const { auditedClient } = require("../utils/audit");
+const { parseAmount } = require("../utils/money");
 
-const prisma = new PrismaClient();
+// Writes to money records are recorded in the audit log (see utils/audit.js)
+const prisma = auditedClient();
 
 function fieldsFromBody(body) {
   return {
@@ -27,11 +29,12 @@ function showAdd(req, res) {
 async function create(req, res) {
   const data = fieldsFromBody(req.body);
 
-  if (!data.expensesId || !data.itemName || data.amount === null || Number.isNaN(data.amount)) {
+  const amount = parseAmount(req.body.amount, "The amount");
+  if (!data.expensesId || !data.itemName || amount.error) {
     return res.status(400).render("expenses/add", {
       title: "Add Expenses",
       currentPage: "expenses",
-      error: "Expenses ID, Item Name, and a valid Amount are required.",
+      error: amount.error || "Expenses ID and Item Name are required.",
       values: req.body,
     });
   }
@@ -63,6 +66,16 @@ async function update(req, res) {
   const expense = await prisma.expense.findUnique({ where: { id } });
   if (!expense) return res.status(404).render("errors/404", { title: "Not Found" });
 
+  const amount = parseAmount(req.body.amount, "The amount");
+  if (!data.expensesId || !data.itemName || amount.error) {
+    return res.status(400).render("expenses/edit", {
+      title: "Edit Expense",
+      currentPage: "expenses",
+      expense: { ...expense, ...req.body },
+      error: amount.error || "Expenses ID and Item Name are required.",
+    });
+  }
+
   if (data.expensesId !== expense.expensesId) {
     const existing = await prisma.expense.findUnique({ where: { expensesId: data.expensesId } });
     if (existing) {
@@ -80,7 +93,9 @@ async function update(req, res) {
 }
 
 async function remove(req, res) {
-  await prisma.expense.delete({ where: { id: Number(req.params.id) } });
+  const id = Number(req.params.id);
+  if (!(await prisma.expense.findUnique({ where: { id } }))) return res.status(404).render("errors/404", { title: "Not Found" });
+  await prisma.expense.delete({ where: { id } });
   res.redirect("/expenses");
 }
 

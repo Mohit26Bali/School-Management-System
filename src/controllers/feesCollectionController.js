@@ -1,9 +1,10 @@
 const { wrapController } = require("../utils/asyncHandler");
-const { PrismaClient } = require("@prisma/client");
+const { auditedClient } = require("../utils/audit");
 
 const { statementFor, remainingFor, computeStatement, cents } = require("../utils/feeBalance");
 
-const prisma = new PrismaClient();
+// Writes to money records are recorded in the audit log (see utils/audit.js)
+const prisma = auditedClient();
 
 // Checks a payment against the fee schedule. Returns an error message, or null when it is fine.
 // A payment must be for a fee that applies to the student, be more than zero, and not go beyond what is still owed.
@@ -147,7 +148,9 @@ async function update(req, res) {
 }
 
 async function remove(req, res) {
-  await prisma.feesCollection.delete({ where: { id: Number(req.params.id) } });
+  const id = Number(req.params.id);
+  if (!(await prisma.feesCollection.findUnique({ where: { id } }))) return res.status(404).render("errors/404", { title: "Not Found" });
+  await prisma.feesCollection.delete({ where: { id } });
   res.redirect("/fees-collections");
 }
 

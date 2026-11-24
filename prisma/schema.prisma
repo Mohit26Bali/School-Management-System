@@ -313,3 +313,18 @@ model TeacherSubject {
 
   @@unique([teacherId, classId, subjectId])
 }
+
+// Who created, changed or deleted a money record (fee payments, expenses, salaries), and what it looked like.
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  userId     Int?
+  userName   String?
+  action     String   // create | update | delete
+  entity     String   // FeesCollection | Expense | Salary
+  entityId   Int
+  changes    String   // JSON: the whole record for create/delete, {field: [before, after]} for update
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
