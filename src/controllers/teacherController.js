@@ -2,8 +2,10 @@ const { wrapController } = require("../utils/asyncHandler");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const { PrismaClient } = require("@prisma/client");
+const { setPortalLogin } = require("../utils/portalAccounts");
 const { getClasses, getSubjects, findClassById } = require("../utils/academicOptions");
 const { teacherProblems } = require("../utils/people");
+const { passwordProblem } = require("../utils/passwords");
 
 const prisma = new PrismaClient();
 
@@ -121,12 +123,13 @@ async function create(req, res) {
         values: req.body,
       });
     }
-    if (password.length < 8) {
+    const weakPassword = passwordProblem(password, email);
+    if (weakPassword) {
       return res.status(400).render("teachers/add", {
         title: "Add Teachers",
         currentPage: "teachers",
         ...(await formOptions()),
-        error: "The portal password must be at least 8 characters.",
+        error: weakPassword,
         values: req.body,
       });
     }
@@ -214,7 +217,13 @@ async function showDetails(req, res) {
     include: { classRef: true, teacherSubjects: { include: { subject: true } } },
   });
   if (!teacher) return res.status(404).render("errors/404", { title: "Not Found" });
-  res.render("teachers/details", { title: "Teacher Details", currentPage: "teachers", teacher });
+  res.render("teachers/details", {
+    title: "Teacher Details",
+    currentPage: "teachers",
+    teacher,
+    portalUser: teacher.userId ? await prisma.user.findUnique({ where: { id: teacher.userId } }) : null,
+    portalMessage: portalMessage(req.query),
+  });
 }
 
 // A teacher who has marked attendance, been paid or been scheduled is marked inactive, not erased (see students).
@@ -238,6 +247,23 @@ async function remove(req, res) {
   res.redirect("/teachers?notice=deleted");
 }
 
+function portalMessage(query) {
+  if (query.login === "created") return { type: "success", text: "Login created. Share the email and password with them in person." };
+  if (query.login === "updated") return { type: "success", text: "Login updated. They were signed out everywhere and must use the new password." };
+  if (typeof query.loginError === "string") return { type: "danger", text: query.loginError.slice(0, 200) };
+  return null;
+}
+
+// Admin gives this person a portal login, or resets the password of the one they have.
+async function setLogin(req, res) {
+  const id = Number(req.params.id);
+  const person = await prisma.teacher.findUnique({ where: { id } });
+  if (!person) return res.status(404).render("errors/404", { title: "Not Found" });
+  const result = await setPortalLogin(prisma, person, "teacher", req.body);
+  if (result.error) return res.redirect(`/teachers/${id}?loginError=${encodeURIComponent(result.error)}`);
+  res.redirect(`/teachers/${id}?login=${result.created ? "created" : "updated"}`);
+}
+
 async function reactivate(req, res) {
   const id = Number(req.params.id);
   const teacher = await prisma.teacher.findUnique({ where: { id } });
@@ -247,4 +273,4 @@ async function reactivate(req, res) {
   res.redirect("/teachers?show=inactive&notice=reactivated");
 }
 
-module.exports = wrapController({ list, showAdd, create, showEdit, update, showDetails, remove, reactivate });
+module.exports = wrapController({ list, showAdd, create, showEdit, update, showDetails, remove, reactivate, setLogin });

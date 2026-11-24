@@ -1,0 +1,27 @@
+<div class="card">
+<div class="card-body">
+<h5 class="mb-3">Portal login</h5>
+<% if (portalMessage) { %><div class="alert alert-<%= portalMessage.type %>"><%= portalMessage.text %></div><% } %>
+<% if (portalUser) { %>
+<p class="mb-2">Signs in as <strong><%= portalUser.email %></strong>
+<% if (!portalUser.active) { %><span class="badge badge-secondary">inactive: cannot sign in</span><% } %></p>
+<p class="text-muted small">Set a new password below if they have forgotten it. They are signed out everywhere.</p>
+<% } else { %>
+<p class="text-muted">No login yet. Create one so they can sign in to their own dashboard.</p>
+<% } %>
+<form method="POST" action="<%= base %>/<%= person.id %>/login" class="form-row" autocomplete="off">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="form-group col-md-5">
+<label>Login email</label>
+<input type="email" name="email" class="form-control" value="<%= portalUser ? portalUser.email : '' %>" required maxlength="100">
+</div>
+<div class="form-group col-md-5">
+<label>New password</label>
+<input type="password" name="password" class="form-control" minlength="8" maxlength="72" required autocomplete="new-password">
+</div>
+<div class="form-group col-md-2 d-flex align-items-end">
+<button type="submit" class="btn btn-primary btn-block"><%= portalUser ? 'Reset' : 'Create' %></button>
+</div>
+</form>
+</div>
+</div>

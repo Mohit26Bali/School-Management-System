@@ -1,9 +1,9 @@
 const { wrapController } = require("../utils/asyncHandler");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
-const fs = require("fs");
-const path = require("path");
 const { PrismaClient } = require("@prisma/client");
+const { destroySessionsFor } = require("../utils/sessions");
+const { passwordProblem } = require("../utils/passwords");
 
 const prisma = new PrismaClient();
 
@@ -17,26 +17,6 @@ function asText(value) {
 
 // A real bcrypt hash of a throwaway string, compared against when the email is unknown (see login).
 const DUMMY_HASH = bcrypt.hashSync(crypto.randomBytes(16).toString("hex"), 10);
-
-// After a password reset, sign that user out everywhere (session files live in .sessions/).
-function destroyOtherSessions(userId) {
-  const dir = path.join(__dirname, "..", "..", ".sessions");
-  let files = [];
-  try {
-    files = fs.readdirSync(dir);
-  } catch {
-    return;
-  }
-  for (const name of files) {
-    if (!name.endsWith(".json")) continue;
-    try {
-      const data = JSON.parse(fs.readFileSync(path.join(dir, name), "utf8"));
-      if (data.userId === userId) fs.unlinkSync(path.join(dir, name));
-    } catch {
-      /* unreadable or already gone */
-    }
-  }
-}
 
 function hashToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -158,7 +138,8 @@ async function resetPassword(req, res) {
   }
 
   const errors = [];
-  if (!password || password.length < 8) errors.push("Password must be at least 8 characters.");
+  const weak = passwordProblem(password, user.email);
+  if (weak) errors.push(weak);
   if (password !== confirmPassword) errors.push("Passwords do not match.");
 
   if (errors.length) {
@@ -170,7 +151,7 @@ async function resetPassword(req, res) {
     where: { id: user.id },
     data: { passwordHash, resetTokenHash: null, resetTokenExpiry: null },
   });
-  destroyOtherSessions(user.id);
+  destroySessionsFor(user.id);
 
   res.render("auth/login", {
     title: "Login",

@@ -11,6 +11,7 @@ router.get("/:id/edit", studentController.showEdit);
 router.post("/:id", ...imageUpload("image"), verifyCsrfTokenParsed, studentController.update);
 router.post("/:id/delete", studentController.remove);
 router.post("/:id/reactivate", studentController.reactivate);
+router.post("/:id/login", studentController.setLogin);
 router.get("/:id", studentController.showDetails);
 
 module.exports = router;

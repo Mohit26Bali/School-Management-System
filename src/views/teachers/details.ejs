@@ -73,6 +73,11 @@
 </div>
 <div class="row mt-3">
 <div class="col-12">
+<%- include('../partials/portal-login', { person: teacher, portalUser: portalUser, portalMessage: portalMessage, base: '/teachers' }) %>
+</div>
+</div>
+<div class="row mt-3">
+<div class="col-12">
 <a href="/teachers/<%= teacher.id %>/edit" class="btn btn-primary"><i class="fas fa-pen"></i> Edit</a>
 <a href="/teachers" class="btn btn-outline-primary">Back to list</a>
 </div>

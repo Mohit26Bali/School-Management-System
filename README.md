@@ -52,7 +52,7 @@ Starts the real app on a throwaway database and checks login, sessions, CSRF, ro
 
 The seed script prints the full list of generated logins to the console when it runs.
 
-There is intentionally **no self-registration** — accounts are provisioned by an admin from the Students/Teachers pages (optionally granting portal login by supplying an email + password there). This avoids unauthenticated users being able to register themselves as admin.
+There is intentionally **no self-registration** — accounts are provisioned by an admin from the Students/Teachers pages (a **Portal login** card on each details page creates or resets the login). This avoids unauthenticated users being able to register themselves as admin.
 
 ## Roles & Permissions
 
@@ -118,6 +118,7 @@ public/                  # static assets: css, js, images, vendor libraries, upl
 - **Audit log** — every create, change and delete of a fee payment, expense or salary is recorded with who did it and what changed (updates store only the fields that changed; deletes keep the full record). Admins read it under **Audit Log**. Amounts on these forms must be positive with at most two decimals, and an inactive teacher cannot be paid.
 - **Timetable rules** — a lesson needs an active teacher, a real date, 24-hour times with the end after the start, and a class and subject. It is refused on a holiday, when the teacher is not assigned to teach that subject to that class level, or when the teacher or the class already has an overlapping lesson (back-to-back lessons are fine).
 - **Data rules for people** — names (letters only), IDs, gender, dates of birth (students 2-60, teachers 18-80) and joining dates (never in the future), phone numbers (7-15 digits) and emails are checked, with every problem named. Each class has a **capacity** (default 40, changed on the Classes page); a student cannot be added or moved into a full class (inactive students do not use a place). A photo uploaded with a refused form is deleted again.
+- **Admin sets logins** — on a student or teacher details page an admin can create a portal login or reset the password (there is no email delivery, so this is how a forgotten password is fixed). Resetting signs the person out everywhere. Passwords need 8-72 characters, no leading or trailing space, and cannot equal the email; changing your own password signs your other browsers out.
 - **Inactive instead of deleted** — removing a student or teacher who has attendance, results, payments or salaries marks them inactive (login blocked, hidden from active lists and sheets, records kept) and they can be reactivated; someone with no history is deleted completely. Lists have Active / Inactive / All tabs.
 - **Attendance days** — attendance cannot be marked for a future day, on a weekend day (`WEEKEND_DAYS`, default Saturday and Sunday), on a holiday from the Holiday list, or more than `ATTENDANCE_EDIT_DAYS` (default 14) days back. A closed day shows why instead of the form.
 - **Attendance tracking** — teachers mark daily Present/Absent/Late per student in their homeroom; admins get a filterable report; students see their own history and an attendance-percentage KPI on their dashboard.

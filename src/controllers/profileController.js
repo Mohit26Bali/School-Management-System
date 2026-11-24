@@ -2,6 +2,8 @@ const { wrapController } = require("../utils/asyncHandler");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const { PrismaClient } = require("@prisma/client");
+const { destroySessionsFor } = require("../utils/sessions");
+const { passwordProblem } = require("../utils/passwords");
 
 const prisma = new PrismaClient();
 
@@ -27,17 +29,19 @@ async function updateProfile(req, res) {
 }
 
 async function changePassword(req, res) {
-  const { currentPassword, newPassword, confirmPassword } = req.body;
+  const text = (v) => (typeof v === "string" ? v : "");
+  const currentPassword = text(req.body.currentPassword);
+  const newPassword = text(req.body.newPassword);
+  const confirmPassword = text(req.body.confirmPassword);
 
   const user = await prisma.user.findUnique({ where: { id: req.session.user.id } });
   const errors = [];
 
-  if (!(await bcrypt.compare(currentPassword || "", user.passwordHash))) {
+  if (!(await bcrypt.compare(currentPassword, user.passwordHash))) {
     errors.push("Current password is incorrect.");
   }
-  if (!newPassword || newPassword.length < 8) {
-    errors.push("New password must be at least 8 characters.");
-  }
+  const weak = passwordProblem(newPassword, user.email);
+  if (weak) errors.push(weak);
   if (newPassword !== confirmPassword) {
     errors.push("New passwords do not match.");
   }
@@ -48,6 +52,7 @@ async function changePassword(req, res) {
 
   const passwordHash = await bcrypt.hash(newPassword, 10);
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+  destroySessionsFor(user.id, req.sessionID); // other browsers must sign in again with the new password
 
   showProfile(req, res, { passwordSuccess: "Password changed." });
 }

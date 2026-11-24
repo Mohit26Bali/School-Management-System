@@ -1,6 +1,7 @@
 const { wrapController } = require("../utils/asyncHandler");
 const path = require("path");
 const { PrismaClient } = require("@prisma/client");
+const { setPortalLogin } = require("../utils/portalAccounts");
 const { getClasses, findClassById } = require("../utils/academicOptions");
 const { statementFor } = require("../utils/feeBalance");
 const { studentProblems } = require("../utils/people");
@@ -174,7 +175,14 @@ async function update(req, res) {
 async function showDetails(req, res) {
   const student = await prisma.student.findUnique({ where: { id: Number(req.params.id) }, include: { classRef: true } });
   if (!student) return res.status(404).render("errors/404", { title: "Not Found" });
-  res.render("students/details", { title: "Student Details", currentPage: "students", student, statement: await statementFor(prisma, student) });
+  res.render("students/details", {
+    title: "Student Details",
+    currentPage: "students",
+    student,
+    statement: await statementFor(prisma, student),
+    portalUser: student.userId ? await prisma.user.findUnique({ where: { id: student.userId } }) : null,
+    portalMessage: portalMessage(req.query),
+  });
 }
 
 // A student with attendance, exam results or fee payments is never erased: school records must stay complete.
@@ -198,6 +206,23 @@ async function remove(req, res) {
   res.redirect("/students?notice=deleted");
 }
 
+function portalMessage(query) {
+  if (query.login === "created") return { type: "success", text: "Login created. Share the email and password with them in person." };
+  if (query.login === "updated") return { type: "success", text: "Login updated. They were signed out everywhere and must use the new password." };
+  if (typeof query.loginError === "string") return { type: "danger", text: query.loginError.slice(0, 200) };
+  return null;
+}
+
+// Admin gives this person a portal login, or resets the password of the one they have.
+async function setLogin(req, res) {
+  const id = Number(req.params.id);
+  const person = await prisma.student.findUnique({ where: { id } });
+  if (!person) return res.status(404).render("errors/404", { title: "Not Found" });
+  const result = await setPortalLogin(prisma, person, "student", req.body);
+  if (result.error) return res.redirect(`/students/${id}?loginError=${encodeURIComponent(result.error)}`);
+  res.redirect(`/students/${id}?login=${result.created ? "created" : "updated"}`);
+}
+
 async function reactivate(req, res) {
   const id = Number(req.params.id);
   const student = await prisma.student.findUnique({ where: { id } });
@@ -207,4 +232,4 @@ async function reactivate(req, res) {
   res.redirect("/students?show=inactive&notice=reactivated");
 }
 
-module.exports = wrapController({ list, showAdd, create, showEdit, update, showDetails, remove, reactivate });
+module.exports = wrapController({ list, showAdd, create, showEdit, update, showDetails, remove, reactivate, setLogin });
