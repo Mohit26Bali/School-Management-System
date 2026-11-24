@@ -132,6 +132,8 @@
                <ul>
                   <li><a href="/hostel" class="<%= currentPage === 'hostel' ? 'active' : '' %>">Room List</a></li>
                   <li><a href="/hostel/add">Add Room</a></li>
+                  <li><a href="/hostel/allocations" class="<%= currentPage === 'hostel-residents' ? 'active' : '' %>">Residents</a></li>
+                  <li><a href="/hostel/allocations/allocate">Allocate a Room</a></li>
                </ul>
             </li>
             <li class="submenu <%= currentPage === 'transport' ? 'active' : '' %>">
@@ -139,6 +141,8 @@
                <ul>
                   <li><a href="/transport" class="<%= currentPage === 'transport' ? 'active' : '' %>">Route List</a></li>
                   <li><a href="/transport/add">Add Route</a></li>
+                  <li><a href="/transport/riders" class="<%= currentPage === 'transport-riders' ? 'active' : '' %>">Riders</a></li>
+                  <li><a href="/transport/riders/assign">Assign a Route</a></li>
                </ul>
             </li>
             <li class="submenu <%= currentPage === 'sports' ? 'active' : '' %>">

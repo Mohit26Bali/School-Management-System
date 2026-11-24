@@ -1,5 +1,6 @@
 const { wrapController } = require("../utils/asyncHandler");
 const { PrismaClient } = require("@prisma/client");
+const { setFlash } = require("../utils/flash");
 
 const prisma = new PrismaClient();
 
@@ -86,12 +87,30 @@ async function update(req, res) {
     }
   }
 
+  // Fewer beds than residents would leave people without a bed.
+  const residents = await prisma.hostelAllocation.count({ where: { roomId: id, endedOn: null } });
+  if (residents > (data.noOfBeds || 1)) {
+    return res.status(400).render("hostel/edit", {
+      title: "Edit Room",
+      currentPage: "hostel",
+      room: { ...room, ...req.body },
+      ...formOptions,
+      error: `${residents} students live in this room, so it cannot have fewer than ${residents} beds.`,
+    });
+  }
+
   await prisma.hostelRoom.update({ where: { id }, data });
   res.redirect("/hostel");
 }
 
 async function remove(req, res) {
-  await prisma.hostelRoom.delete({ where: { id: Number(req.params.id) } });
+  const id = Number(req.params.id);
+  if (!(await prisma.hostelRoom.findUnique({ where: { id } }))) return res.status(404).render("errors/404", { title: "Not Found" });
+  if ((await prisma.hostelAllocation.count({ where: { roomId: id } })) > 0) {
+    setFlash(req, "warning", "Students have lived in that room, so it cannot be deleted. Mark it Not Available instead.");
+    return res.redirect("/hostel");
+  }
+  await prisma.hostelRoom.delete({ where: { id } });
   res.redirect("/hostel");
 }
 

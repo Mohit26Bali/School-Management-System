@@ -6,6 +6,7 @@ const { setFlash } = require("../utils/flash");
 const { getClasses, findClassById } = require("../utils/academicOptions");
 const { statementFor } = require("../utils/feeBalance");
 const { studentProblems } = require("../utils/people");
+const { today } = require("../utils/library");
 
 const prisma = new PrismaClient();
 
@@ -181,6 +182,9 @@ async function showDetails(req, res) {
     currentPage: "students",
     student,
     statement: await statementFor(prisma, student),
+    room: await prisma.hostelAllocation.findFirst({ where: { studentId: student.id, endedOn: null }, include: { room: true } }),
+    ride: await prisma.transportRider.findFirst({ where: { studentId: student.id, endedOn: null }, include: { transport: true } }),
+    openLoans: await prisma.loan.count({ where: { studentId: student.id, returnedOn: null } }),
     portalUser: student.userId ? await prisma.user.findUnique({ where: { id: student.userId } }) : null,
   });
 }
@@ -191,12 +195,22 @@ async function remove(req, res) {
   const id = Number(req.params.id);
   const student = await prisma.student.findUnique({
     where: { id },
-    include: { _count: { select: { attendance: true, examResults: true, feesCollections: true } } },
+    include: { _count: { select: { attendance: true, examResults: true, feesCollections: true, loans: true, hostelStays: true, transportRides: true } } },
   });
   if (!student) return res.status(404).render("errors/404", { title: "Not Found" });
 
+  // Books must come back before someone leaves.
+  if (await prisma.loan.findFirst({ where: { studentId: id, returnedOn: null } })) {
+    setFlash(req, "warning", "That student still has library books out. Return them under Book Loans first.");
+    return res.redirect("/students");
+  }
+
   const hasHistory = Object.values(student._count).some((n) => n > 0);
   if (hasHistory) {
+    // Leaving school ends the hostel room and transport route too, keeping the history.
+    const left = today();
+    await prisma.hostelAllocation.updateMany({ where: { studentId: id, endedOn: null }, data: { endedOn: left } });
+    await prisma.transportRider.updateMany({ where: { studentId: id, endedOn: null }, data: { endedOn: left } });
     await prisma.student.update({ where: { id }, data: { active: false, leftOn: new Date() } });
     if (student.userId) await prisma.user.update({ where: { id: student.userId }, data: { active: false } });
     return res.redirect("/students?notice=deactivated");

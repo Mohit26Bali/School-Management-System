@@ -1,5 +1,6 @@
 const { wrapController } = require("../utils/asyncHandler");
 const { PrismaClient } = require("@prisma/client");
+const { setFlash } = require("../utils/flash");
 
 const prisma = new PrismaClient();
 
@@ -11,6 +12,7 @@ function fieldsFromBody(body) {
     licenseNumber: body.licenseNumber || null,
     contactNumber: body.contactNumber || null,
     driverAddress: body.driverAddress || null,
+    seats: typeof body.seats === "string" && /^\d{1,3}$/.test(body.seats.trim()) && Number(body.seats) > 0 ? Number(body.seats) : null,
   };
 }
 
@@ -74,12 +76,28 @@ async function update(req, res) {
     }
   }
 
+  const riding = await prisma.transportRider.count({ where: { transportId: id, endedOn: null } });
+  if (data.seats && riding > data.seats) {
+    return res.status(400).render("transport/edit", {
+      title: "Edit Transport",
+      currentPage: "transport",
+      route: { ...route, ...req.body },
+      error: `${riding} students ride this route, so it cannot have fewer than ${riding} seats.`,
+    });
+  }
+
   await prisma.transport.update({ where: { id }, data });
   res.redirect("/transport");
 }
 
 async function remove(req, res) {
-  await prisma.transport.delete({ where: { id: Number(req.params.id) } });
+  const id = Number(req.params.id);
+  if (!(await prisma.transport.findUnique({ where: { id } }))) return res.status(404).render("errors/404", { title: "Not Found" });
+  if ((await prisma.transportRider.count({ where: { transportId: id } })) > 0) {
+    setFlash(req, "warning", "Students have ridden that route, so it cannot be deleted.");
+    return res.redirect("/transport");
+  }
+  await prisma.transport.delete({ where: { id } });
   res.redirect("/transport");
 }
 

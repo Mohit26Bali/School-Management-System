@@ -55,6 +55,8 @@ model Student {
 
   feesCollections   FeesCollection[]
   examResults       ExamResult[]
+  hostelStays       HostelAllocation[]
+  transportRides    TransportRider[]
   loans             Loan[]
   attendance        Attendance[]
 }
@@ -210,6 +212,7 @@ model HostelRoom {
   noOfBeds     Int?
   costPerBed   Float?
   availability String   @default("Available")
+  allocations  HostelAllocation[]
   createdAt    DateTime @default(now())
 
   @@unique([block, roomNo])
@@ -223,6 +226,8 @@ model Transport {
   licenseNumber  String?
   contactNumber  String?
   driverAddress  String?
+  seats          Int?
+  riders         TransportRider[]
   createdAt      DateTime @default(now())
 }
 
@@ -346,5 +351,35 @@ model Loan {
   createdAt  DateTime  @default(now())
 
   @@index([bookId])
+  @@index([studentId])
+}
+
+// A student living in a hostel room. A stay with no endedOn is current.
+model HostelAllocation {
+  id        Int        @id @default(autoincrement())
+  room      HostelRoom @relation(fields: [roomId], references: [id])
+  roomId    Int
+  student   Student    @relation(fields: [studentId], references: [id])
+  studentId Int
+  startedOn DateTime
+  endedOn   DateTime?
+  createdAt DateTime   @default(now())
+
+  @@index([roomId])
+  @@index([studentId])
+}
+
+// A student using a transport route. A ride with no endedOn is current.
+model TransportRider {
+  id          Int       @id @default(autoincrement())
+  transport   Transport @relation(fields: [transportId], references: [id])
+  transportId Int
+  student     Student   @relation(fields: [studentId], references: [id])
+  studentId   Int
+  startedOn   DateTime
+  endedOn     DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([transportId])
   @@index([studentId])
 }

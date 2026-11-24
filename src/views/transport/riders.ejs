@@ -1,0 +1,44 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Transport Riders</h3>
+<ul class="breadcrumb"><li class="breadcrumb-item"><a href="/transport">Transport</a></li><li class="breadcrumb-item active">Riders</li></ul>
+</div>
+<div class="col-auto text-right float-right ml-auto"><a href="/transport/riders/assign" class="btn btn-primary"><i class="fas fa-plus"></i> Assign a route</a></div>
+</div>
+</div>
+<%- include('../partials/flash') %>
+<ul class="nav nav-pills mb-3">
+<li class="nav-item"><a class="nav-link <%= show === 'current' ? 'active' : '' %>" href="/transport/riders">Riding now</a></li>
+<li class="nav-item"><a class="nav-link <%= show === 'history' ? 'active' : '' %>" href="/transport/riders?show=history">Past</a></li>
+</ul>
+<div class="card card-table"><div class="card-body"><div class="table-responsive">
+<table class="table table-hover table-center mb-0">
+<thead><tr><th>Student</th><th>Route</th><th>From</th><% if (show === 'history') { %><th>Until</th><% } else { %><th></th><% } %></tr></thead>
+<tbody>
+<% if (rides.length === 0) { %><tr><td colspan="4" class="text-center text-muted">Nobody here yet.</td></tr><% } %>
+<% rides.forEach(function(x) { %>
+<tr>
+<td><%= x.student.firstName %> <%= x.student.lastName %> <small class="text-muted">(<%= x.student.studentId %>)</small></td>
+<td><%= x.transport.routeName %></td>
+<td><%= x.startedOn.toDateString() %></td>
+<% if (show === 'history') { %><td><%= x.endedOn.toDateString() %></td><% } else { %>
+<td class="text-right"><form method="POST" action="/transport/riders/<%= x.id %>/end" class="d-inline" onsubmit="return confirm('Remove this student from the route?');"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit" class="btn btn-sm btn-outline-primary">Remove</button></form></td>
+<% } %>
+</tr>
+<% }) %>
+</tbody></table></div></div></div>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>

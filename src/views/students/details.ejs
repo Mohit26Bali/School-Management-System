@@ -71,6 +71,9 @@
 </div>
 <div class="row mt-3">
 <div class="col-12">
+<p class="mb-1"><span class="title-span">Hostel : </span><span class="info-span"><%= room ? 'Room ' + room.room.roomNo + ' (Block ' + room.room.block + ')' : '-' %></span></p>
+<p class="mb-1"><span class="title-span">Transport : </span><span class="info-span"><%= ride ? ride.transport.routeName : '-' %></span></p>
+<p class="mb-3"><span class="title-span">Library books out : </span><span class="info-span"><%= openLoans %></span></p>
 <%- include('../partials/fee-statement', { statement }) %>
 </div>
 </div>

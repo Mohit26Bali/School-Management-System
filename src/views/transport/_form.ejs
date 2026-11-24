@@ -51,6 +51,12 @@ function val(v) { return v === null || v === undefined ? '' : v; }
 <input type="text" name="driverAddress" class="form-control" value="<%= val(r.driverAddress) %>">
 </div>
 </div>
+<div class="col-12 col-sm-6">
+<div class="form-group">
+<label>Seats (optional)</label>
+<input type="number" name="seats" min="1" max="999" class="form-control" value="<%= val(r.seats) %>">
+</div>
+</div>
 <div class="col-12">
 <button type="submit" class="btn btn-primary">Submit</button>
 </div>

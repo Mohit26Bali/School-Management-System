@@ -1,0 +1,39 @@
+<%- include('../partials/head', { title }) %>
+<body>
+<div class="main-wrapper">
+<%- include('../partials/header', { user: sessionUser }) %>
+<%- include('../partials/sidebar', { currentPage }) %>
+<div class="page-wrapper">
+<div class="content container-fluid">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
+<h3 class="page-title">Allocate a Room</h3>
+<ul class="breadcrumb"><li class="breadcrumb-item"><a href="/hostel/allocations">Residents</a></li><li class="breadcrumb-item active">Allocate</li></ul>
+</div>
+
+</div>
+</div>
+<%- include('../partials/flash') %>
+<div class="card"><div class="card-body">
+<% if (typeof error !== 'undefined' && error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+<form method="POST" action="/hostel/allocations">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="row">
+<div class="col-12 col-sm-6"><div class="form-group"><label>Room</label>
+<select name="roomId" class="form-control" required>
+<option value="">Select room</option>
+<% rooms.forEach(function(r) { %><option value="<%= r.id %>" <%= typeof values !== 'undefined' && String(values.roomId) === String(r.id) ? 'selected' : '' %> <%= r.free < 1 || r.availability !== 'Available' ? 'disabled' : '' %>><%= r.roomNo %> (Block <%= r.block %>), <%= r.free %> of <%= r.beds %> beds free<%= r.availability !== 'Available' ? ' - ' + r.availability : '' %></option><% }) %>
+</select></div></div>
+<div class="col-12 col-sm-6"><div class="form-group"><label>Student ID</label>
+<input type="text" name="studentId" class="form-control" value="<%= typeof values !== 'undefined' && typeof values.studentId === 'string' ? values.studentId : '' %>" placeholder="e.g. PRE2209" required></div></div>
+<div class="col-12"><button type="submit" class="btn btn-primary">Allocate</button></div>
+</div>
+</form></div></div>
+</div>
+<%- include('../partials/footer') %>
+</div>
+</div>
+<%- include('../partials/scripts') %>
+</body>
+</html>
