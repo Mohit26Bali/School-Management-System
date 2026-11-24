@@ -105,4 +105,13 @@ async function seedBasics(prisma, hash) {
   return { classA, classB, admin, teacher, inClass, otherClass, tUser, sUser };
 }
 
-module.exports = { startApp, seedBasics, root };
+// A recent Monday-Friday as YYYY-MM-DD (UTC, like the app stores days), at least `daysBack` days ago.
+function recentWeekday(daysBack = 1) {
+  const d = new Date();
+  d.setUTCHours(0, 0, 0, 0);
+  d.setUTCDate(d.getUTCDate() - daysBack);
+  while (d.getUTCDay() === 0 || d.getUTCDay() === 6) d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+module.exports = { startApp, seedBasics, recentWeekday, root };

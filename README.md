@@ -32,7 +32,7 @@ DATABASE_URL="file:./dev.db"
 SESSION_SECRET="<32+ random characters>"
 ```
 
-Generate a secret with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. In development a missing or weak `SESSION_SECRET` falls back to a temporary random one (you are signed out on every restart); with `NODE_ENV=production` the app **refuses to start** without a real one. Other optional settings (`PORT`, `NODE_ENV`, `TRUST_PROXY`, `LOGIN_ATTEMPT_LIMIT`) are described in `.env.example`.
+Generate a secret with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. In development a missing or weak `SESSION_SECRET` falls back to a temporary random one (you are signed out on every restart); with `NODE_ENV=production` the app **refuses to start** without a real one. Other optional settings (`PORT`, `NODE_ENV`, `TRUST_PROXY`, `LOGIN_ATTEMPT_LIMIT`, `WEEKEND_DAYS`, `ATTENDANCE_EDIT_DAYS`) are described in `.env.example`.
 
 ### Tests
 
@@ -119,6 +119,7 @@ public/                  # static assets: css, js, images, vendor libraries, upl
 - **Timetable rules** — a lesson needs an active teacher, a real date, 24-hour times with the end after the start, and a class and subject. It is refused on a holiday, when the teacher is not assigned to teach that subject to that class level, or when the teacher or the class already has an overlapping lesson (back-to-back lessons are fine).
 - **Data rules for people** — names (letters only), IDs, gender, dates of birth (students 2-60, teachers 18-80) and joining dates (never in the future), phone numbers (7-15 digits) and emails are checked, with every problem named. Each class has a **capacity** (default 40, changed on the Classes page); a student cannot be added or moved into a full class (inactive students do not use a place). A photo uploaded with a refused form is deleted again.
 - **Inactive instead of deleted** — removing a student or teacher who has attendance, results, payments or salaries marks them inactive (login blocked, hidden from active lists and sheets, records kept) and they can be reactivated; someone with no history is deleted completely. Lists have Active / Inactive / All tabs.
+- **Attendance days** — attendance cannot be marked for a future day, on a weekend day (`WEEKEND_DAYS`, default Saturday and Sunday), on a holiday from the Holiday list, or more than `ATTENDANCE_EDIT_DAYS` (default 14) days back. A closed day shows why instead of the form.
 - **Attendance tracking** — teachers mark daily Present/Absent/Late per student in their homeroom; admins get a filterable report; students see their own history and an attendance-percentage KPI on their dashboard.
 - **Dark mode** — a manual, persisted toggle (cookie-based) in the header; the theme class is applied to `<html>` via a blocking inline script in `<head>` to avoid a flash of the wrong theme on load.
 - **DataTables / Select2 / datepicker / input masking** — wired up on list pages and forms (search, sort, pagination on tables; searchable dropdowns for class/subject/etc.; a real date picker instead of raw `<input type="date">`; masked phone number inputs).

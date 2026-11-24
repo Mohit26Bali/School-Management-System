@@ -29,7 +29,9 @@
 <button type="submit" class="btn btn-outline-primary">Load</button>
 </form>
 
-<% if (students.length === 0) { %>
+<% if (blocked) { %>
+<div class="alert alert-warning mb-0"><%= blocked %> Pick another date above.</div>
+<% } else if (students.length === 0) { %>
 <p class="text-muted mb-0">No students found in your class/section (<%= teacher.classRef ? teacher.classRef.name + ' ' + teacher.classRef.section : 'not assigned' %>).</p>
 <% } else { %>
 <form method="POST" action="/teacher/attendance">

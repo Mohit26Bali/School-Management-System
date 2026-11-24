@@ -4,7 +4,7 @@ const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
-const { startApp, seedBasics, root } = require("./helpers");
+const { startApp, seedBasics, recentWeekday, root } = require("./helpers");
 
 let ctx, prisma, base, ids, browser;
 const uploadsDir = path.join(root, "public", "uploads");
@@ -129,18 +129,21 @@ test("password reset: an unknown email gets the same neutral answer as a known o
 });
 
 test("attendance: a teacher can mark their own class, not another class, and a bad date does not crash", async () => {
+  const markDay = recentWeekday(2);
   const t = browser();
   await t.login("teacher@test.local", "password123", "teacher");
   const token = await t.csrf();
 
   const res = await t.post("/teacher/attendance", {
     _csrf: token,
-    date: "2026-03-02",
+    date: markDay,
     [`status[student-${ids.inClass}]`]: "Present",
     [`status[student-${ids.otherClass}]`]: "Absent",
   });
   assert.equal(res.status, 302);
-  assert.equal(await prisma.attendance.count({ where: { studentId: ids.inClass } }), 1);
+  const saved = await prisma.attendance.findMany({ where: { studentId: ids.inClass } });
+  assert.equal(saved.length, 1);
+  assert.equal(saved[0].date.toISOString().slice(0, 10), markDay, "the chosen day is the one saved");
   assert.equal(await prisma.attendance.count({ where: { studentId: ids.otherClass } }), 0, "other class must not be markable");
 
   const badDate = await t.post("/teacher/attendance", { _csrf: token, date: "not-a-date", [`status[student-${ids.inClass}]`]: "Late" });
