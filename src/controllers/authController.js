@@ -71,6 +71,15 @@ async function login(req, res) {
     });
   }
 
+  if (!user.active) {
+    return res.status(401).render("auth/login", {
+      title: "Login",
+      error: "This account has been deactivated. Please contact the school office.",
+      email,
+      role,
+    });
+  }
+
   if (user.role !== role) {
     return res.status(401).render("auth/login", {
       title: "Login",

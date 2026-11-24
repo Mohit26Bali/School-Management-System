@@ -26,7 +26,7 @@ async function showForm(req, res) {
 
   const [students, existing] = await Promise.all([
     teacher.classId
-      ? prisma.student.findMany({ where: { classId: teacher.classId }, orderBy: { firstName: "asc" } })
+      ? prisma.student.findMany({ where: { classId: teacher.classId, active: true }, orderBy: { firstName: "asc" } })
       : [],
     prisma.attendance.findMany({ where: { teacherId: teacher.id, date } }),
   ]);
@@ -62,7 +62,7 @@ async function save(req, res) {
     if (!match || !STATUSES.includes(value)) continue;
     const studentId = Number(match[1]);
 
-    const student = await prisma.student.findFirst({ where: { id: studentId, classId: teacher.classId } });
+    const student = await prisma.student.findFirst({ where: { id: studentId, classId: teacher.classId, active: true } });
     if (!student) continue;
 
     await prisma.attendance.upsert({

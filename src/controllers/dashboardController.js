@@ -24,8 +24,8 @@ async function showDashboard(req, res) {
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
   const [studentCount, teacherCount, feesAgg, expensesAgg, feesRows, expenseRows, holidays, events] = await Promise.all([
-    prisma.student.count(),
-    prisma.teacher.count(),
+    prisma.student.count({ where: { active: true } }),
+    prisma.teacher.count({ where: { active: true } }),
     prisma.feesCollection.aggregate({ _sum: { amount: true } }),
     prisma.expense.aggregate({ _sum: { amount: true } }),
     prisma.feesCollection.findMany({ where: { paidDate: { gte: sixMonthsAgo } }, select: { amount: true, paidDate: true } }),

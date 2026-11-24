@@ -12,6 +12,7 @@ async function search(req, res) {
   if (q) {
     students = await prisma.student.findMany({
       where: {
+        active: true,
         OR: [
           { firstName: { contains: q } },
           { lastName: { contains: q } },
@@ -23,6 +24,7 @@ async function search(req, res) {
     });
     teachers = await prisma.teacher.findMany({
       where: {
+        active: true,
         OR: [{ name: { contains: q } }, { teacherId: { contains: q } }],
       },
       include: { teacherSubjects: { include: { subject: true } } },

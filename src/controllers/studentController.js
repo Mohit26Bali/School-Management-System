@@ -30,9 +30,22 @@ function fieldsFromBody(body) {
   };
 }
 
+// ?show=active (default) | inactive | all
+function showFilter(query) {
+  const show = ["active", "inactive", "all"].includes(query.show) ? query.show : "active";
+  return { show, where: show === "all" ? {} : { active: show === "active" } };
+}
+
+const NOTICES = {
+  deleted: "Removed. They had no records, so they were deleted completely.",
+  deactivated: "Marked inactive. They have records (attendance, results or payments), so those were kept, and they can no longer sign in.",
+  reactivated: "Reactivated.",
+};
+
 async function list(req, res) {
-  const students = await prisma.student.findMany({ orderBy: { id: "desc" }, include: { classRef: true } });
-  res.render("students/list", { title: "Students", currentPage: "students", students });
+  const { show, where } = showFilter(req.query);
+  const students = await prisma.student.findMany({ where, orderBy: { id: "desc" }, include: { classRef: true } });
+  res.render("students/list", { title: "Students", currentPage: "students", students, show, notice: NOTICES[req.query.notice] || null });
 }
 
 async function showAdd(req, res) {
@@ -125,9 +138,34 @@ async function showDetails(req, res) {
   res.render("students/details", { title: "Student Details", currentPage: "students", student });
 }
 
+// A student with attendance, exam results or fee payments is never erased: school records must stay complete.
+// They are marked inactive instead (and their login stops working). A student with no history is deleted outright.
 async function remove(req, res) {
-  await prisma.student.delete({ where: { id: Number(req.params.id) } });
-  res.redirect("/students");
+  const id = Number(req.params.id);
+  const student = await prisma.student.findUnique({
+    where: { id },
+    include: { _count: { select: { attendance: true, examResults: true, feesCollections: true } } },
+  });
+  if (!student) return res.status(404).render("errors/404", { title: "Not Found" });
+
+  const hasHistory = Object.values(student._count).some((n) => n > 0);
+  if (hasHistory) {
+    await prisma.student.update({ where: { id }, data: { active: false, leftOn: new Date() } });
+    if (student.userId) await prisma.user.update({ where: { id: student.userId }, data: { active: false } });
+    return res.redirect("/students?notice=deactivated");
+  }
+  await prisma.student.delete({ where: { id } });
+  if (student.userId) await prisma.user.delete({ where: { id: student.userId } });
+  res.redirect("/students?notice=deleted");
 }
 
-module.exports = wrapController({ list, showAdd, create, showEdit, update, showDetails, remove });
+async function reactivate(req, res) {
+  const id = Number(req.params.id);
+  const student = await prisma.student.findUnique({ where: { id } });
+  if (!student) return res.status(404).render("errors/404", { title: "Not Found" });
+  await prisma.student.update({ where: { id }, data: { active: true, leftOn: null } });
+  if (student.userId) await prisma.user.update({ where: { id: student.userId }, data: { active: true } });
+  res.redirect("/students?show=inactive&notice=reactivated");
+}
+
+module.exports = wrapController({ list, showAdd, create, showEdit, update, showDetails, remove, reactivate });

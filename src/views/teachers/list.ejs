@@ -19,6 +19,14 @@
 </div>
 </div>
 </div>
+<% if (typeof notice !== 'undefined' && notice) { %>
+<div class="alert alert-success"><%= notice %></div>
+<% } %>
+<ul class="nav nav-pills mb-3">
+<li class="nav-item"><a class="nav-link <%= show === 'active' ? 'active' : '' %>" href="/teachers">Active</a></li>
+<li class="nav-item"><a class="nav-link <%= show === 'inactive' ? 'active' : '' %>" href="/teachers?show=inactive">Inactive</a></li>
+<li class="nav-item"><a class="nav-link <%= show === 'all' ? 'active' : '' %>" href="/teachers?show=all">All</a></li>
+</ul>
 <div class="row">
 <div class="col-sm-12">
 <div class="card card-table">
@@ -60,12 +68,21 @@
 <a href="/teachers/<%= teacher.id %>/edit" class="btn btn-sm bg-success-light mr-2">
 <i class="fas fa-pen"></i>
 </a>
-<form method="POST" action="/teachers/<%= teacher.id %>/delete" class="d-inline" onsubmit="return confirm('Delete this teacher?');">
+<% if (teacher.active) { %>
+<form method="POST" action="/teachers/<%= teacher.id %>/delete" class="d-inline" onsubmit="return confirm('Remove this teacher? If they have attendance, results or payments on record they are marked inactive instead of deleted.');">
 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-<button type="submit" class="btn btn-sm bg-danger-light">
+<button type="submit" class="btn btn-sm bg-danger-light" title="Remove or mark inactive" aria-label="Remove or mark inactive">
 <i class="fas fa-trash"></i>
 </button>
 </form>
+<% } else { %>
+<form method="POST" action="/teachers/<%= teacher.id %>/reactivate" class="d-inline" onsubmit="return confirm('Reactivate this teacher?');">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<button type="submit" class="btn btn-sm bg-info-light" title="Reactivate" aria-label="Reactivate">
+<i class="fas fa-undo"></i>
+</button>
+</form>
+<% } %>
 </div>
 </td>
 </tr>

@@ -16,6 +16,7 @@ model User {
   avatarUrl         String?
   resetTokenHash     String?
   resetTokenExpiry   DateTime?
+  active            Boolean   @default(true)
   createdAt         DateTime  @default(now())
   teacher           Teacher?
   student           Student?
@@ -45,6 +46,8 @@ model Student {
   motherEmail       String?
   presentAddress    String?
   permanentAddress  String?
+  active            Boolean  @default(true)
+  leftOn            DateTime?
   createdAt         DateTime @default(now())
 
   user              User?    @relation(fields: [userId], references: [id])
@@ -73,6 +76,8 @@ model Teacher {
   zipCode        String?
   country        String?
   imageUrl       String?
+  active         Boolean  @default(true)
+  leftOn         DateTime?
   createdAt      DateTime @default(now())
 
   user           User?    @relation(fields: [userId], references: [id])

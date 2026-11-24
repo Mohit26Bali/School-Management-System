@@ -1,97 +1,23 @@
-// Run with: node --test tests/
+// Run with: node --test tests/security.test.js
 // Starts the real app on a throwaway SQLite database and drives it over HTTP.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("fs");
-const os = require("os");
 const path = require("path");
-const { execSync } = require("child_process");
+const { startApp, seedBasics, root } = require("./helpers");
 
-const root = path.join(__dirname, "..");
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sms-test-"));
-const dbFile = path.join(tmpDir, "test.db").replace(/\\/g, "/");
-process.env.DATABASE_URL = `file:${dbFile}`;
-process.env.SESSION_SECRET = "test-secret-test-secret-test-secret";
-process.env.NODE_ENV = "test";
-process.env.LOGIN_ATTEMPT_LIMIT = "1000"; // the limiter has its own test file
-
-let server, base, prisma, bcrypt, ids;
+let ctx, prisma, base, ids, browser;
 const uploadsDir = path.join(root, "public", "uploads");
 const uploadsBefore = () => (fs.existsSync(uploadsDir) ? fs.readdirSync(uploadsDir) : []);
 
-// A tiny browser: keeps cookies, follows nothing automatically.
-function browser() {
-  const jar = new Map();
-  async function request(method, url, { form, body, headers = {} } = {}) {
-    const h = { ...headers };
-    if (jar.size) h.cookie = [...jar].map(([k, v]) => `${k}=${v}`).join("; ");
-    let payload = body;
-    if (form) {
-      payload = new URLSearchParams(form).toString();
-      h["content-type"] = "application/x-www-form-urlencoded";
-    }
-    const res = await fetch(base + url, { method, headers: h, body: payload, redirect: "manual" });
-    for (const c of res.headers.getSetCookie()) {
-      const [pair] = c.split(";");
-      const i = pair.indexOf("=");
-      jar.set(pair.slice(0, i), pair.slice(i + 1));
-    }
-    res.text = await res.text();
-    res.setCookies = res.headers.getSetCookie();
-    return res;
-  }
-  const csrf = async () => {
-    const page = await request("GET", "/login");
-    const m = /name="_csrf" value="([^"]+)"/.exec(page.text);
-    assert.ok(m, "the login page carries a CSRF token");
-    return m[1];
-  };
-  return {
-    get: (url) => request("GET", url),
-    post: (url, form) => request("POST", url, { form }),
-    postRaw: (url, body, headers) => request("POST", url, { body, headers }),
-    csrf,
-    sessionId: () => jar.get("sms.sid"),
-    async login(email, password, role = "admin") {
-      const token = await csrf();
-      return request("POST", "/login", { form: { _csrf: token, email, password, role } });
-    },
-  };
-}
-
 before(async () => {
-  execSync("npx prisma migrate deploy", { cwd: root, env: process.env, stdio: "pipe" });
-  const { PrismaClient } = require("@prisma/client");
-  prisma = new PrismaClient();
-  bcrypt = require("bcryptjs");
-  const hash = await bcrypt.hash("password123", 4);
-
-  const classA = await prisma.class.create({ data: { name: "10", section: "A" } });
-  const classB = await prisma.class.create({ data: { name: "10", section: "B" } });
-  const admin = await prisma.user.create({ data: { name: "Admin", email: "admin@test.local", passwordHash: hash, role: "admin" } });
-  const tUser = await prisma.user.create({ data: { name: "Teach", email: "teacher@test.local", passwordHash: hash, role: "teacher" } });
-  const sUser = await prisma.user.create({ data: { name: "Stud", email: "student@test.local", passwordHash: hash, role: "student" } });
-  const teacher = await prisma.teacher.create({ data: { teacherId: "T1", name: "Teach", classId: classA.id, userId: tUser.id } });
-  const inClass = await prisma.student.create({ data: { firstName: "In", lastName: "Class", studentId: "S1", classId: classA.id, userId: sUser.id } });
-  const otherClass = await prisma.student.create({ data: { firstName: "Out", lastName: "Class", studentId: "S2", classId: classB.id } });
-  ids = { admin: admin.id, teacher: teacher.id, inClass: inClass.id, otherClass: otherClass.id };
-
-  const app = require("../src/app");
-  await new Promise((resolve) => {
-    server = app.listen(0, "127.0.0.1", resolve);
-  });
-  base = `http://127.0.0.1:${server.address().port}`;
+  ctx = await startApp();
+  ({ prisma, base, browser } = ctx);
+  const s = await seedBasics(prisma, ctx.hash);
+  ids = { admin: s.admin.id, teacher: s.teacher.id, inClass: s.inClass.id, otherClass: s.otherClass.id };
 });
 
-after(async () => {
-  await new Promise((resolve) => server.close(resolve));
-  await prisma.$disconnect();
-  try {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
-  } catch {
-    /* Windows may still hold the database file for a moment; the OS temp folder is cleaned up later */
-  }
-});
+after(() => ctx.stop());
 
 test("login: right password signs in, wrong password and unknown email are refused the same way", async () => {
   const ok = await browser().login("admin@test.local", "password123");

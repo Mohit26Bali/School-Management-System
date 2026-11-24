@@ -31,7 +31,7 @@ async function create(req, res) {
     });
   }
 
-  const student = await prisma.student.findUnique({ where: { studentId } });
+  const student = await prisma.student.findFirst({ where: { studentId, active: true } });
   if (!student) {
     return res.status(400).render("fees-collections/add", {
       title: "Add Fees Collection",
@@ -75,7 +75,7 @@ async function update(req, res) {
   const collection = await prisma.feesCollection.findUnique({ where: { id }, include: { student: true } });
   if (!collection) return res.status(404).render("errors/404", { title: "Not Found" });
 
-  const student = await prisma.student.findUnique({ where: { studentId } });
+  const student = await prisma.student.findFirst({ where: { studentId, active: true } });
   if (!student) {
     return res.status(400).render("fees-collections/edit", {
       title: "Edit Fees Collection",

@@ -10,6 +10,7 @@ router.post("/", ...imageUpload("image"), verifyCsrfTokenParsed, studentControll
 router.get("/:id/edit", studentController.showEdit);
 router.post("/:id", ...imageUpload("image"), verifyCsrfTokenParsed, studentController.update);
 router.post("/:id/delete", studentController.remove);
+router.post("/:id/reactivate", studentController.reactivate);
 router.get("/:id", studentController.showDetails);
 
 module.exports = router;

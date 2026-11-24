@@ -28,7 +28,7 @@ async function showDashboard(req, res) {
 
   const [allEntries, totalStudents, upcomingLessons, holidays, events, teacherSubjects] = await Promise.all([
     prisma.timeTableEntry.findMany({ where: { teacherId: teacher.id } }),
-    teacher.classId ? prisma.student.count({ where: { classId: teacher.classId } }) : 0,
+    teacher.classId ? prisma.student.count({ where: { classId: teacher.classId, active: true } }) : 0,
     prisma.timeTableEntry.findMany({
       where: { teacherId: teacher.id, date: { gte: now } },
       orderBy: { date: "asc" },

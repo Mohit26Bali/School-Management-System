@@ -44,12 +44,26 @@ function subjectIdsFromBody(body) {
   return arr.map(Number).filter((n) => Number.isInteger(n) && n > 0);
 }
 
+// ?show=active (default) | inactive | all
+function showFilter(query) {
+  const show = ["active", "inactive", "all"].includes(query.show) ? query.show : "active";
+  return { show, where: show === "all" ? {} : { active: show === "active" } };
+}
+
+const NOTICES = {
+  deleted: "Removed. They had no records, so they were deleted completely.",
+  deactivated: "Marked inactive. They have records (attendance, results or payments), so those were kept, and they can no longer sign in.",
+  reactivated: "Reactivated.",
+};
+
 async function list(req, res) {
+  const { show, where } = showFilter(req.query);
   const teachers = await prisma.teacher.findMany({
+    where,
     orderBy: { id: "desc" },
     include: { classRef: true, teacherSubjects: { include: { subject: true } } },
   });
-  res.render("teachers/list", { title: "Teachers", currentPage: "teachers", teachers });
+  res.render("teachers/list", { title: "Teachers", currentPage: "teachers", teachers, show, notice: NOTICES[req.query.notice] || null });
 }
 
 async function showAdd(req, res) {
@@ -190,11 +204,34 @@ async function showDetails(req, res) {
   res.render("teachers/details", { title: "Teacher Details", currentPage: "teachers", teacher });
 }
 
+// A teacher who has marked attendance, been paid or been scheduled is marked inactive, not erased (see students).
 async function remove(req, res) {
   const id = Number(req.params.id);
+  const teacher = await prisma.teacher.findUnique({
+    where: { id },
+    include: { _count: { select: { attendanceMarked: true, salaries: true, timeTableEntries: true } } },
+  });
+  if (!teacher) return res.status(404).render("errors/404", { title: "Not Found" });
+
+  const hasHistory = Object.values(teacher._count).some((n) => n > 0);
+  if (hasHistory) {
+    await prisma.teacher.update({ where: { id }, data: { active: false, leftOn: new Date() } });
+    if (teacher.userId) await prisma.user.update({ where: { id: teacher.userId }, data: { active: false } });
+    return res.redirect("/teachers?notice=deactivated");
+  }
   await prisma.teacherSubject.deleteMany({ where: { teacherId: id } });
   await prisma.teacher.delete({ where: { id } });
-  res.redirect("/teachers");
+  if (teacher.userId) await prisma.user.delete({ where: { id: teacher.userId } });
+  res.redirect("/teachers?notice=deleted");
 }
 
-module.exports = wrapController({ list, showAdd, create, showEdit, update, showDetails, remove });
+async function reactivate(req, res) {
+  const id = Number(req.params.id);
+  const teacher = await prisma.teacher.findUnique({ where: { id } });
+  if (!teacher) return res.status(404).render("errors/404", { title: "Not Found" });
+  await prisma.teacher.update({ where: { id }, data: { active: true, leftOn: null } });
+  if (teacher.userId) await prisma.user.update({ where: { id: teacher.userId }, data: { active: true } });
+  res.redirect("/teachers?show=inactive&notice=reactivated");
+}
+
+module.exports = wrapController({ list, showAdd, create, showEdit, update, showDetails, remove, reactivate });
